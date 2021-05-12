@@ -1,0 +1,92 @@
+# Initially taken from Github's Python gitignore file
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Examples
+runs
+/runs_old
+/wandb
+/examples/runs
+/examples/**/*.args
+/examples/rag/sweep
+
+# Data
+/data
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Local variables
+.vscode/*
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+*.log
+
+# Mkdocs documentation
+/site
+
+# Logging and Callbacks
+/wandb/*
+
+# Datasets Checkpoints and Outputs
+data/*
+datasets/*
+checkpoints/*
+test_outputs/*
+
+# Examples from other libraries
+code_examples
+
+# Downloads of datasets
+download_arxiv
+download_s2orc
+
+# Weigth & Biases files
+wandb
+logs
+runs
+
+# Output file for configuration
+output
+
+# Old files
+bin
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# IDEs
+# vscode
+.vs
+.vscode
+
+# Pycharm
+.idea

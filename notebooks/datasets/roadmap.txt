@@ -1,0 +1,25 @@
+### Load dataset wrapper
+---
+
+The function `load_dataset_wrapper` is thougth to wrap the original `load_dataset` function from `hf`. This is because we provide 2 additional custom datasets (other than what's inside `huggingface/datasets.hub` repository).
+The datasets we provide will have some custom parameters we treat at the beginning:
+
+0. [ ] Utils
+    2. [ ] Dataset config
+        1. [ ] dataset Name ("s2orc", "keyphrase", and the others)
+        2. [ ] create generic DatasetConfig
+        3. [ ] create s2orc DatasetConfig
+        4. [ ] create keyphrase DatasetConfig
+1. [ ] <span style="color:red">S2ORC dataset (train/test)</span>
+    1. [ ] full/sample
+    2. [ ] mag_field specification (e.g. \["Computer Science", "Phisics"\] )
+    3. [ ] (only for full) chunk ids (e.g. \[0, 1, 2\] over the 99 we have downloaded)
+    4. [ ] data, target, classes (e.g. dictionary_input = { "data": \["abstract"\], "target": \["title"\], "classes": \["mag_field_of_study"\]})
+2. [ ] <span style="color:blue">KeyPhrase dataset (train)</span>
+    1. [ ] Find it !
+3. [ ] <span style="color:green">KeyPhrase dataset (test)</span>
+    1. [ ] title/abstract/keyphrase
+    2. [ ] field specification (e.g. \["Computer Science", "Phisics"\] )
+4. [ ] <span style="color:orange">Fusion s2orc + keyphrase</span>
+    1. [ ] having fulltest + keyphrases (same papers title | paper_id | arxive_id)
+    

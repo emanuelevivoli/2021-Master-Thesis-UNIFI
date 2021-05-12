@@ -1,0 +1,8 @@
+# environment and vscode variables
+.env
+.vscode
+.ipynb_checkpoints
+__pycache__
+
+# old notebooks and files are saved here
+# .old
