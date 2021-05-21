@@ -6,7 +6,7 @@ with open("README.md", mode="r", encoding="utf-8") as readme_file:
 
 setup(
     name="thesis",
-    version="0.0.1",
+    version="0.0.2",
     author="Emanuele Vivoli",
     author_email="vivoli.emanuele@gmail.com",
     description="Master Thesis in NLP, with Huggingface and sentence-transformers",

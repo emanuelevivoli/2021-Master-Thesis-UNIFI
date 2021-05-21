@@ -1,0 +1,148 @@
+# nocache:  "True"
+
+# ------------------
+# DatasetArguments
+# ------------------ 
+dataset_path: "/home/vivoli/Thesis/data"
+dataset_name: "s2orc"  # "keyphrase"
+dataset_config_name: "sample"  # "inspec"
+# ? train_file
+# ? validation_file
+# ? validation_split_percentage
+# ? pad_to_max_length
+# ? use_slow_tokenizer
+# ? overwrite_cache
+max_seq_length: '512'
+# ? preprocessing_num_workers
+# ? mlm_probability
+# ? line_by_line
+# ? max_train_samples
+# ? max_eval_samples
+
+# ------------------ 
+# TrainingArguments
+# ------------------ 
+output_dir: "/home/vivoli/Thesis/outputs"
+# ? overwrite_output_dir
+num_train_epochs: '1'    
+# ? max_train_steps
+per_device_train_batch_size: "8"    # 16 and 32 end with "RuntimeError: CUDA out of memory."
+per_device_eval_batch_size: "8"    # 16 and 32 end with "RuntimeError: CUDA out of memory."
+# ? learning_rate
+# ? weight_decay
+# ? gradient_accumulation_steps
+# ? lr_scheduler_type
+# ? num_warmup_steps
+# ? logging_dir
+
+# ------------------ 
+# ModelArguments
+# ------------------ 
+model_name_or_path: "allenai/scibert_scivocab_uncased"
+# ? model_type
+# ? config_name
+data: "abstract"
+target: "title"
+classes: "mag_field_of_study"  # "keywords"
+# ? tokenizer_name
+# ? cache_dir
+# ? use_fast_tokenizer
+# ? model_revision
+# ? use_auth_token
+
+## ----- S2orcArguments ----- #
+idxs: '0'
+zipped: True
+mag_field_of_study: ''  # "Computer Science" but we want all
+keep_none_papers: False
+keep_unused_columns: False
+## ----- KeyPhArguments ----- #
+# no params
+## ----- JournArguments ----- #
+# no params
+
+# ------------------ 
+# RunArguments
+# ------------------ 
+run_name: "scibert-s2orc"
+run_number: '0'
+run_iteration: '0'
+
+# ------------------ 
+# LoggingArguments
+# ------------------ 
+verbose: False
+debug_log: False
+time: False
+callbacks: "WandbCallback,CometCallback,TensorBoardCallback"
+
+# ------------------ 
+# EmbeddingArguments
+# ------------------ 
+# ? pooling
+# ? batch_size
+
+# ------------------ 
+# VisualizationArguments
+# ------------------ 
+fields: 'abstract'
+# same as model_name_or_path
+# model_name: 'distilbert-base-nli-mean-tokens' 
+#'bert-base-uncased' 'allenai/scibert_scivocab_uncased''paraphrase-distilroberta-base-v1'
+
+# ----------
+## - PRE dimensionality reduction
+pre_alg: 'umap' # 'pca' 'tsne'
+pre_n_neighbors: 15
+# umap tsne
+pre_metric: 'cosine'  
+
+# UMAP
+pre_n_components: 50  # 768 -> 50
+
+# PCA
+# no params
+
+# tSNE
+pre_perplexity: 30.0
+
+# ----------
+## --- clustering algorithm --- #
+clustering_alg: 'kmeans'  # 'hdbscan'
+# KMEANS = 8 HIERARCHICAL=2
+n_clusters: 10  
+
+# HDBSCAN
+min_cluster_size: 5
+metric: 'euclidean'
+cluster_selection_method: 'eom'
+
+# KMEANS
+n_init: 10
+max_iter: 300
+
+# HIERARCHICAL
+affinity: 'euclidean' # “l1” “l2” “manhattan” “cosine” or “precomputed”
+linkage: 'ward'  # ‘complete’ ‘average’ ‘single’
+
+# ----------
+## --- POST dimensionality reduction --- #
+post_alg: 'umap'  # 'pca' 'tsne'
+post_n_neighbors: 15
+# umap tsne
+post_metric: 'cosine'  
+
+# UMAP
+
+post_n_components: 2  # 50 -> 2
+post_min_dist: 0.0
+
+# PCA
+# no params
+
+# tSNE
+post_perplexity: 30.0
+
+# ----------
+## ---  VISUALIZATION  --- #
+# no params

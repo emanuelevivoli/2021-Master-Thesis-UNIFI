@@ -12,6 +12,8 @@ runs
 /examples/runs
 /examples/**/*.args
 /examples/rag/sweep
+/output/
+/examples/**/output
 
 # Data
 /data
@@ -62,7 +64,9 @@ logs
 runs
 
 # Output file for configuration
-output
+!outputs/
+outputs/*
+!outputs/imgs/
 
 # Old files
 bin

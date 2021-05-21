@@ -5,59 +5,58 @@ from datetime import datetime
 # Path and constants
 from thesis.utils.constants import OUT_PATH
 from matplotlib import pyplot as plt
+import pandas as pd
 
 
-def generate_name(visual_args):
+def generate_name(args_):
     name = f'd:{datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}_'
     extention = '.png'
 
     # PAPER FIELDs
-    name += f"Fie::{visual_args.fields}_"
+    name += f"Fie::{args_.fields}_"
 
     # EMBEDDING network
-    name += f"Net::{visual_args.model_name}_"
+    name += f"Net::{args_.model_name_or_path}_"
 
     # PRE
-    name += f"PREa::{visual_args.pre_alg}:"
-    if visual_args.pre_alg == 'none':
+    name += f"PREa::{args_.pre_alg}:"
+    if args_.pre_alg == 'none':
         name = name
 
-    if visual_args.pre_alg == 'umap':
-        name += f'{visual_args.pre_n_neighbors}:{visual_args.pre_n_components}:{visual_args.pre_metric}_'
+    if args_.pre_alg == 'umap':
+        name += f'{args_.pre_n_neighbors}:{args_.pre_n_components}:{args_.pre_metric}_'
 
-    elif visual_args.pre_alg == 'pca':
-        name += f'{visual_args.pre_n_components}_'
+    elif args_.pre_alg == 'pca':
+        name += f'{args_.pre_n_components}_'
 
-    elif visual_args.pre_alg == 'tsne':
-        # name += f'{visual_args.pre_perplexity}_{visual_args.pre_n_components}_'
-        name += f'{visual_args.pre_n_components}_'
+    elif args_.pre_alg == 'tsne':
+        # name += f'{args_.pre_perplexity}_{args_.pre_n_components}_'
+        name += f'{args_.pre_n_components}_'
 
     # CLUSTER
-    name += f"Clu::{visual_args.clustering_alg}:"
-    if visual_args.clustering_alg == 'kmeans':
-        name += f'{visual_args.n_clusters}_'
+    name += f"Clu::{args_.clustering_alg}:"
+    if args_.clustering_alg == 'kmeans':
+        name += f'{args_.n_clusters}_'
 
-    if visual_args.clustering_alg == 'hdbscan':
-        name += f'{visual_args.min_cluster_size}:{visual_args.metric}:{visual_args.cluster_selection_method}_'
+    if args_.clustering_alg == 'hdbscan':
+        name += f'{args_.min_cluster_size}:{args_.metric}:{args_.cluster_selection_method}_'
 
     # POST
-    name += f"POSTa::{visual_args.post_alg}:"
-    if visual_args.post_alg == 'umap':
-        name += f'{visual_args.post_n_neighbors}:{visual_args.post_n_components}:{visual_args.post_metric}:{visual_args.post_min_dist}_'
+    name += f"POSTa::{args_.post_alg}:"
+    if args_.post_alg == 'umap':
+        name += f'{args_.post_n_neighbors}:{args_.post_n_components}:{args_.post_metric}:{args_.post_min_dist}_'
 
-    elif visual_args.post_alg == 'pca':
-        name += f'{visual_args.post_n_components}_'
+    elif args_.post_alg == 'pca':
+        name += f'{args_.post_n_components}_'
 
-    elif visual_args.post_alg == 'tsne':
-        # name += f'{visual_args.post_perplexity}_{visual_args.post_n_components}_'
-        name += f'{visual_args.post_n_components}_'
+    elif args_.post_alg == 'tsne':
+        # name += f'{args_.post_perplexity}_{args_.post_n_components}_'
+        name += f'{args_.post_n_components}_'
 
     return name + extention
 
 
-def visualization(visual_args, x, y, labels):
-    import matplotlib.pyplot as plt
-    import pandas as pd
+def visualization(args_, x, y, labels):
 
     # Prepare data
     dataframe = {
@@ -78,7 +77,7 @@ def visualization(visual_args, x, y, labels):
     if not os.path.exists(os.path.join(OUT_PATH, 'imgs')):
         os.makedirs(os.path.join(OUT_PATH, 'imgs'))
 
-    name = generate_name(visual_args)
+    name = generate_name(args_)
 
     plt.savefig(os.path.join(OUT_PATH, 'imgs', name))
 
