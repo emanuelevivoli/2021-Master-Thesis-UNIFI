@@ -1,0 +1,10 @@
+//// conda
+conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch -c nvidia
+conda install tqdm pandas numpy
+
+//// pip
+pip install datasets transformers thesis
+pip install --upgrade comet_ml --quiet
+pip install --upgrade wandb
+//// old
+// accelerate

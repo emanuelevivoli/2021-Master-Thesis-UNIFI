@@ -5,7 +5,7 @@ with open("README.md", mode="r", encoding="utf-8") as readme_file:
 
 
 setup(
-    name="thesis-emanuelevivoli",
+    name="thesis",
     version="0.0.1",
     author="Emanuele Vivoli",
     author_email="vivoli.emanuele@gmail.com",
@@ -22,9 +22,11 @@ setup(
     packages=find_packages(where="src"),
     python_requires=">=3.6",
     # install_requires=[
-    #     'transformers>=3.1.0,<5.0.0',
+    #     'transformers',
     #     'tqdm',
-    #     'torch>=1.6.0',
+    #     'pytorch',
+    #     'pickle',
+    #     'hashlib',
     #     'numpy',
     #     'scikit-learn',
     #     'scipy',

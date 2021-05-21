@@ -46,6 +46,9 @@ datasets/*
 checkpoints/*
 test_outputs/*
 
+# Caching variables
+*.cache
+
 # Examples from other libraries
 code_examples
 
