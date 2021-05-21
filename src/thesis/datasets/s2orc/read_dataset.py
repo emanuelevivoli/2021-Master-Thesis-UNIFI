@@ -4,11 +4,11 @@ import json
 import os
 from typing import List
 
-from ..cache import _caching
+from thesis.config.datasets import S2orcConfig
+from thesis.config.execution import LogConfig
+from thesis.config.base import fingerprints
 
-from ..config.datasets import S2orcConfig
-from ..config.execution import LogConfig
-from ..config.base import fingerprints
+from thesis.utils.cache import _caching, no_caching
 
 import logging
 
@@ -60,7 +60,8 @@ def read_meta_json_list_dict(
             mag_field_all = True
         else:
             if log_config.verbose:
-                logging.info("Mag field List is not empty: inizializing dictionary")
+                logging.info(
+                    "Mag field List is not empty: inizializing dictionary")
             for field in dataset_config.mag_field_of_study:
                 mag_field_dict[field] = True
     elif type(dataset_config.mag_field_of_study) is str:
@@ -74,10 +75,12 @@ def read_meta_json_list_dict(
             if log_config.verbose:
                 logging.info("Mag field Str is only one element!")
             mag_field_dict[config.mag_field_of_study] = True
-            dataset_config.mag_field_of_study = [dataset_config.mag_field_of_study]
+            dataset_config.mag_field_of_study = [
+                dataset_config.mag_field_of_study]
         else:
             if log_config.verbose:
-                logging.info("Mag field Str is corrupted, all mag field will be taken!")
+                logging.info(
+                    "Mag field Str is corrupted, all mag field will be taken!")
             mag_field_all = True
             dataset_config.mag_field_of_study = []
     else:
@@ -112,7 +115,8 @@ def read_meta_json_list_dict(
                 # append the dictionary to the dictionaries' list
                 json_list_of_dict.append(json_dict)
                 # insert (paper_id, index) pair as (key, value) to the dictionary
-                json_dict_of_index[json_dict["paper_id"]] = json_list_of_dict_idx
+                json_dict_of_index[json_dict["paper_id"]
+                                   ] = json_list_of_dict_idx
                 # increment the list index
                 json_list_of_dict_idx += 1
 
@@ -164,7 +168,8 @@ def read_pdfs_json_list_dict(
                 # append the dictionary to the dictionaries' list
                 json_list_of_dict.append(json_dict)
                 # insert (paper_id, index) pair as (key, value) to the dictionary
-                json_dict_of_index[json_dict["paper_id"]] = json_list_of_dict_idx
+                json_dict_of_index[json_dict["paper_id"]
+                                   ] = json_list_of_dict_idx
                 # increment the list index
                 json_list_of_dict_idx += 1
 
@@ -198,11 +203,13 @@ def s2orc_chunk_read(
     """
 
     if log_config.verbose:
-        logging.info("[INFO-START] Metadata Chunk read  : ", meta_s2orc_single_file)
+        logging.info("[INFO-START] Metadata Chunk read  : ",
+                     meta_s2orc_single_file)
     if log_config.verbose:
-        logging.info("[          ] Pdf parses Chunk read: ", pdfs_s2orc_single_file)
+        logging.info("[          ] Pdf parses Chunk read: ",
+                     pdfs_s2orc_single_file)
 
-    @_caching(
+    @no_caching(
         dataset_config=dataset_config,
         meta_s2orc_single_file=meta_s2orc_single_file,
         pdfs_s2orc_single_file=pdfs_s2orc_single_file,
@@ -250,7 +257,8 @@ def s2orc_chunk_read(
         json_dict_of_list["pdf_key_idx"] = json_dict_of_index_pdf
 
         if log_config.verbose:
-            logging.info(f"[INFO] json_dict_of_list len: {len(json_dict_of_list)}")
+            logging.info(
+                f"[INFO] json_dict_of_list len: {len(json_dict_of_list)}")
         if log_config.verbose:
             logging.info(
                 "[INFO-END  ] Chunk read: ",
@@ -266,9 +274,11 @@ def s2orc_chunk_read(
     )
 
     if log_config.verbose:
-        logging.info("[        ] Metadata Chunk read  : ", meta_s2orc_single_file)
+        logging.info("[        ] Metadata Chunk read  : ",
+                     meta_s2orc_single_file)
     if log_config.verbose:
-        logging.info("[INFO-END] Pdf parses Chunk read: ", pdfs_s2orc_single_file)
+        logging.info("[INFO-END] Pdf parses Chunk read: ",
+                     pdfs_s2orc_single_file)
 
     return json_dict_of_list
 
@@ -312,7 +322,7 @@ def s2orc_multichunk_read(
     ), "Files list (metadata and pdfs) must be the same length!"
     assert dataset_config.extention is not None, "Extention must be set!"
 
-    if log_config.verbose:
+    if dataset_config.s2orc_type == 'full' and log_config.verbose:
         logging.info(
             f"[INFO] Data read selection : \n \
                             [{'x' if not dataset_config.zipped else ' '}] Extracted \n \
@@ -321,7 +331,7 @@ def s2orc_multichunk_read(
         )
 
     # **(dataset_config.get_configuration())
-    @_caching(
+    @no_caching(
         sorted(toread_meta_s2orc),
         sorted(toread_pdfs_s2orc),
         **fingerprints(dataset_config),

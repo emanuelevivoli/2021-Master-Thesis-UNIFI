@@ -3,19 +3,17 @@ from typing import Optional
 
 # 🤗 Transformers
 from transformers import SchedulerType
-
-# 🤗 Transformers
 from transformers import TrainingArguments as HfTrainingArguments
 
 # ----------------------------- #
 # Definition of Custom Parsers  #
-#    - DatasetArguments         #
-#    - ModelArguments           #
+#    - DataTrainingArguments    #
+#    - TrainingArguments        #
 # ----------------------------- #
 
 
 @dataclass
-class DatasetArguments:
+class DataTrainingArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
@@ -54,30 +52,34 @@ class DatasetArguments:
             "help": "The percentage of the train set used as validation set in case there's no validation split"
         },
     )
-    pad_to_max_length: str = field(
-        default=None,
+    pad_to_max_length: bool = field(
+        default=False,
         metadata={
-            "help": "If passed, pad all samples to `max_length`. Otherwise, dynamic padding is used."
+            "help": "Whether to pad all samples to `max_seq_length`. "
+            "If False, will pad the samples dynamically when batching to the maximum length in the batch."
         },
     )
-    model_name_or_path: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Path to pretrained model or model identifier from huggingface.co/models."
-        },
-    )
-    config_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Pretrained config name or path if not the same as model_name"
-        },
-    )
-    tokenizer_name: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "Pretrained tokenizer name or path if not the same as model_name."
-        },
-    )
+    # ! already in ModelArguments
+    # model_name_or_path: Optional[str] = field(
+    #     default=None,
+    #     metadata={
+    #         "help": "Path to pretrained model or model identifier from huggingface.co/models."
+    #     },
+    # )
+    # ! already in ModelArguments
+    # config_name: Optional[str] = field(
+    #     default=None,
+    #     metadata={
+    #         "help": "Pretrained config name or path if not the same as model_name"
+    #     },
+    # )
+    # ! already in ModelArguments
+    # tokenizer_name: Optional[str] = field(
+    #     default=None,
+    #     metadata={
+    #         "help": "Pretrained tokenizer name or path if not the same as model_name."
+    #     },
+    # )
     use_slow_tokenizer: Optional[str] = field(
         default=None,
         metadata={
@@ -85,28 +87,57 @@ class DatasetArguments:
         },
     )
 
+    overwrite_cache: bool = field(
+        default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
+    )
+    max_seq_length: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": "The maximum total input sequence length after tokenization. Sequences longer "
+            "than this will be truncated."
+        },
+    )
+    preprocessing_num_workers: Optional[int] = field(
+        default=None,
+        metadata={"help": "The number of processes to use for the preprocessing."},
+    )
+    mlm_probability: float = field(
+        default=0.15, metadata={"help": "Ratio of tokens to mask for masked language modeling loss"}
+    )
+    line_by_line: bool = field(
+        default=False,
+        metadata={
+            "help": "Whether distinct lines of text in the dataset are to be handled as distinct sequences."},
+    )
 
-# @dataclass
-# class ModelArguments:
-#     """
-#     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
-#     """
+    max_train_samples: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": "For debugging purposes or quicker training, truncate the number of training examples to this "
+            "value if set."
+        },
+    )
+    max_eval_samples: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
+            "value if set."
+        },
+    )
 
-#     model_name_or_path: str = field(
-#         metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
-#     )
-#     config_name: Optional[str] = field(
-#         default=None, metadata={"help": "Pretrained config name or path if not the same as model_name"}
-#     )
-#     tokenizer_name: Optional[str] = field(
-#         default=None, metadata={"help": "Pretrained tokenizer name or path if not the same as model_name"}
-#     )
-#     use_fast: bool = field(default=False, metadata={"help": "Set this flag to use fast tokenization."})
-#     # If you want to tweak more attributes on your tokenizer, you should do it in a distinct script,
-#     # or just modify its tokenizer_config.json.
-#     cache_dir: Optional[str] = field(
-#         default=None, metadata={"help": "Where do you want to store the pretrained models downloaded from s3"}
-#     )
+    # def __post_init__(self):
+    #     if self.dataset_name is None and self.train_file is None and self.validation_file is None:
+    #         raise ValueError(
+    #             "Need either a dataset name or a training/validation file.")
+    #     else:
+    #         if self.train_file is not None:
+    #             extension = self.train_file.split(".")[-1]
+    #             assert extension in [
+    #                 "csv", "json", "jsonl", "txt"], "`train_file` should be a csv, a json, a jsonl or a txt file."
+    #         if self.validation_file is not None:
+    #             extension = self.validation_file.split(".")[-1]
+    #             assert extension in [
+    #                 "csv", "json", "json", "txt"], "`validation_file` should be a csv, a json, a jsonl or a txt file."
 
 
 @dataclass
@@ -118,6 +149,12 @@ class TrainingArguments(HfTrainingArguments):
     # ------------------------ #
     #        Training           #
     # ------------------------ #
+    # do_train: bool = field(default=False, metadata={
+    #                     "help": "Whether to run training."})
+    # do_eval: bool = field(default=False, metadata={
+    #                     "help": "Whether to run eval on the dev set."})
+    # do_predict: bool = field(default=False, metadata={
+    #     "help": "Whether to run predictions on the test set."})
 
     per_device_train_batch_size: int = field(
         default=8,
@@ -170,35 +207,31 @@ class TrainingArguments(HfTrainingArguments):
     seed: int = field(
         default=None, metadata={"help": "A seed for reproducible training."}
     )
-    # model_type:str = field( default=None,
-    #     metadata={"help":"Model type to use if training from scratch."},
-    #     # choices=MODEL_TYPES,
+    # max_seq_length: int = field(
+    #     default=None,
+    #     metadata={
+    #         "help": "The maximum total input sequence length after tokenization. Sequences longer than this will be truncated."
+    #     },
     # )
-    max_seq_length: int = field(
-        default=None,
-        metadata={
-            "help": "The maximum total input sequence length after tokenization. Sequences longer than this will be truncated."
-        },
-    )
-    line_by_line: bool = field(
-        default=False,
-        metadata={
-            "help": "Whether distinct lines of text in the dataset are to be handled as distinct sequences."
-        },
-    )
-    preprocessing_num_workers: int = field(
-        default=None,
-        metadata={"help": "The number of processes to use for the preprocessing."},
-    )
-    overwrite_cache: bool = field(
-        default=False,
-        metadata={"help": "Overwrite the cached training and evaluation sets"},
-    )
-    mlm_probability: float = field(
-        default=0.15,
-        metadata={
-            "help": "Ratio of tokens to mask for masked language modeling loss"},
-    )
+    # line_by_line: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether distinct lines of text in the dataset are to be handled as distinct sequences."
+    #     },
+    # )
+    # preprocessing_num_workers: int = field(
+    #     default=None,
+    #     metadata={"help": "The number of processes to use for the preprocessing."},
+    # )
+    # overwrite_cache: bool = field(
+    #     default=False,
+    #     metadata={"help": "Overwrite the cached training and evaluation sets"},
+    # )
+    # mlm_probability: float = field(
+    #     default=0.15,
+    #     metadata={
+    #         "help": "Ratio of tokens to mask for masked language modeling loss"},
+    # )
     logging_dir: str = field(
         default="./logs",
         metadata={

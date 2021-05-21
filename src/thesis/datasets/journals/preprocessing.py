@@ -17,14 +17,14 @@ import numpy as np
 
 from typing import Dict, List
 
-from ..cache import no_caching, _caching
+from thesis.utils.cache import no_caching, _caching
 
-from ..config.base import fingerprints, Config  # , SingleChunk
-from ..config.datasets import JurNLConfig
-from ..config.execution import RunConfig, LogConfig
+from thesis.config.base import fingerprints, Config  # , SingleChunk
+from thesis.config.datasets import JouRNConfig
+from thesis.config.execution import RunConfig, LogConfig
 
 
-def jurnl_convert_to_dataset(log_config: LogConfig, datasets_dict: dict):
+def journ_convert_to_dataset(log_config: LogConfig, datasets_dict: dict):
     # Load the Dictionary
     _dataset = pd.DataFrame(datasets_dict)
     # Convert `list` to `Dataset` with `Dataset.from_pandas`
@@ -34,19 +34,19 @@ def jurnl_convert_to_dataset(log_config: LogConfig, datasets_dict: dict):
 
 def get_dataset(
     dataset: List,
-    dataset_config: JurNLConfig,
+    dataset_config: JouRNConfig,
     run_config: RunConfig,
     log_config: LogConfig,
 ) -> Dict[str, DataLoader]:
     """Given an input file, prepare the train, test, validation dataloaders.
     :param single_chunk: `SingleChunk`, input file related to one chunk (format list)
-    :param dataset_config: `JurNLConfig`, pretrained tokenizer that will prepare the data, i.e. convert tokens into IDs
+    :param dataset_config: `JouRNConfig`, pretrained tokenizer that will prepare the data, i.e. convert tokens into IDs
     :param run_config: `RunConfig`, if set, seed for split train/val/test
     :param log_config: `LogConfig`, batch size for the dataloaders
     :return: a dictionary containing train, test, validation dataloaders
     """
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
-    @_caching(
+    @no_caching(
         key_value_sort(single_chunk["meta_key_idx"]),
         key_value_sort(single_chunk["pdf_key_idx"]),
         **fingerprints(dataset_config, run_config, log_config),
@@ -54,7 +54,7 @@ def get_dataset(
     )
     def _get_dataset(
         dataset: List,
-        dataset_config: JurNLConfig,
+        dataset_config: JouRNConfig,
         run_config: RunConfig,
         log_config: LogConfig,
     ) -> DatasetDict:
@@ -68,7 +68,7 @@ def get_dataset(
             start_load = time.time()
 
         # execution
-        dataset_dict = jurnl_convert_to_dataset(log_config, dataset)
+        dataset_dict = journ_convert_to_dataset(log_config, dataset)
 
         #  print(dataset_dict)
 

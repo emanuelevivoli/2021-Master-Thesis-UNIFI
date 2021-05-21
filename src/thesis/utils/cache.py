@@ -4,7 +4,8 @@ import pickle
 from inspect import signature
 from typing import Dict, List
 import functools
-from .constants import CACHE_DIR
+
+from thesis.utils.constants import CACHE_DIR
 
 
 class ConfigWrapper:
@@ -31,7 +32,8 @@ class ConfigWrapper:
         # setting the function name
         # if passed as function_name='function_name' we get it from kwargs
         self.function_name = (
-            kwargs.get("function_name") if kwargs.get("function_name", False) else None
+            kwargs.get("function_name") if kwargs.get(
+                "function_name", False) else None
         )
 
         assert (
@@ -104,7 +106,8 @@ def _caching(*conf_args, **conf_kwargs):
                 result = function(*args, **kwargs)
                 with open(file_cache, "wb") as file:
                     pickle.dump(result, file)
-                print(f"\rcalculated result for function {function.__qualname__}    ")
+                print(
+                    f"\rcalculated result for function {function.__qualname__}    ")
             else:
                 print(
                     f"loading result from cache for function {function.__qualname__}...",
@@ -168,11 +171,13 @@ def caching(function, config_object: ConfigWrapper):
 
         file_cache = os.path.join(CACHE_DIR, hex_digest)
         if not os.path.exists(file_cache):
-            print(f"calculating result for function {function.__qualname__}...", end="")
+            print(
+                f"calculating result for function {function.__qualname__}...", end="")
             result = function(*args, **kwargs)
             with open(file_cache, "wb") as file:
                 pickle.dump(result, file)
-            print(f"\rcalculated result for function {function.__qualname__}    ")
+            print(
+                f"\rcalculated result for function {function.__qualname__}    ")
         else:
             print(
                 f"loading result from cache for function {function.__qualname__}...",

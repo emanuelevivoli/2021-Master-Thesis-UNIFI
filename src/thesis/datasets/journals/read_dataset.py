@@ -4,29 +4,27 @@ import os
 from typing import List, Dict
 
 # 🤗 Datasets
-from datasets import DatasetDict
+from datasets import DatasetDict, Dataset as hfDataset
 from datasets.load import load_dataset
 
 
-from .preprocessing import get_dataset
-from ..config.datasets import JurNLConfig
-from ..config.execution import LogConfig, RunConfig
-from ..config.base import fingerprints
-from ..cache import _caching
+from thesis.datasets.journals.preprocessing import get_dataset
+from thesis.config.datasets import JouRNConfig
+from thesis.config.execution import LogConfig, RunConfig
+from thesis.config.base import fingerprints
+from thesis.utils.cache import _caching
 
 import logging
 import pandas as pd
 
-from datasets import Dataset as hfDataset
 
-
-def load_jsonl(dataset_config: JurNLConfig, log_config: LogConfig):
+def load_jsonl(dataset_config: JouRNConfig, log_config: LogConfig):
     import json
     import logging
 
     # just open as usual
     json_path = os.path.join(
-        dataset_config.path, dataset_config.jurnl_type, f"{dataset_config.jurnl_type}.jsonl"
+        dataset_config.path, dataset_config.journ_type, f"{dataset_config.journ_type}.jsonl"
     )
     input_json = open(json_path, "r")
     if log_config.verbose:
@@ -40,10 +38,10 @@ def load_jsonl(dataset_config: JurNLConfig, log_config: LogConfig):
     return json_list
 
 
-def json_journal_read(dataset_config: JurNLConfig, log_config: LogConfig, run_config: RunConfig):
+def json_journal_read(dataset_config: JouRNConfig, log_config: LogConfig, run_config: RunConfig):
     """ Reads the keyphrases datasets specified and return a list of Datasets.      \\
     Args:                                                                           \\
-        - `dataset_config`: (JurNLConfig), dataset configuration object             \\
+        - `dataset_config`: (JouRNConfig), dataset configuration object             \\
         - `log_config`: (LogConfig), logging configuration                          \\
                                                                                     \\
     Return:                                                                         \\
@@ -57,8 +55,8 @@ def json_journal_read(dataset_config: JurNLConfig, log_config: LogConfig, run_co
         logging.info("[INFO-START] Journal Dataset read")
 
     # **(dataset_config.get_configuration())
-    @_caching(**fingerprints(dataset_config), function_name="json_journal_read")
-    def _json_journal_read(dataset_config: JurNLConfig, log_config: LogConfig, run_config: RunConfig):
+    @no_caching(**fingerprints(dataset_config), function_name="json_journal_read")
+    def _json_journal_read(dataset_config: JouRNConfig, log_config: LogConfig, run_config: RunConfig):
 
         # `dataset_name` from kyphrase dataset is a list of dataset names
         # so we can mix those dataset to create one single dataset

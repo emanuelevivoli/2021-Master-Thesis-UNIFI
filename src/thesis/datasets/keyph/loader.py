@@ -6,16 +6,16 @@ from transformers import PreTrainedTokenizer
 
 from typing import List
 
-from .read_dataset import json_keyphrase_read
+from thesis.datasets.keyph.read_dataset import json_keyphrase_read
 
 # Dataset configuration files
-from ..config.datasets import KeyPHConfig
+from thesis.config.datasets import KeyPHConfig
 
-from ..config.execution import RunConfig, LogConfig
+from thesis.config.execution import RunConfig, LogConfig
 
-from ..config.base import fingerprints
+from thesis.config.base import fingerprints
 
-from ..cache import no_caching, _caching
+from thesis.utils.cache import no_caching, _caching
 
 
 def keyph_loader(

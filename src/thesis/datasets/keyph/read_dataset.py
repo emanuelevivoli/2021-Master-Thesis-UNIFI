@@ -7,10 +7,10 @@ from typing import List, Dict
 from datasets import DatasetDict
 from datasets.load import load_dataset
 
-from ..config.datasets import KeyPHConfig
-from ..config.execution import LogConfig
-from ..config.base import fingerprints
-from ..cache import _caching
+from thesis.config.datasets import KeyPHConfig
+from thesis.config.execution import LogConfig
+from thesis.config.base import fingerprints
+from thesis.utils.cache import _caching
 
 import logging
 import pandas as pd
@@ -101,7 +101,7 @@ def json_keyphrase_read(dataset_config: KeyPHConfig, log_config: LogConfig):
         logging.info("[INFO-START] Multi dataset read")
 
     # **(dataset_config.get_configuration())
-    @_caching(**fingerprints(dataset_config), function_name="json_keyphrase_read")
+    @no_caching(**fingerprints(dataset_config), function_name="json_keyphrase_read")
     def _json_keyphrase_read(dataset_config: KeyPHConfig, log_config: LogConfig):
 
         multidatasets_lists: List[dict] = []

@@ -13,9 +13,12 @@ class RunConfig(Config):
     def __init__(self, *args, **kwargs):
         # inizialize all variables
         self.name: str = kwargs["run_name"]  # (string) experiment name
-        self.number: int = kwargs["run_number"]  # (number) for the relative experiment
-        self.iteration: str = kwargs["run_iteration"]  # (string) iteration code
-        self.seed: int = kwargs["seed"]  # (number) the seed for the system randomness
+        # (number) for the relative experiment
+        self.number: int = int(kwargs["run_number"])
+        # (string) iteration code
+        self.iteration: str = kwargs["run_iteration"]
+        # (number) the seed for the system randomness
+        self.seed: int = int(kwargs["seed"])
 
     def get_fingerprint(self) -> Dict:
         # return disctionay of important value to hash
@@ -27,7 +30,7 @@ class LogConfig(Config):
     - verbose `verbose` (bool), flag for logging information logs
     - debug `debug` (bool), flag for logging all debug logs ( ⚠️ tons of logs ⚠️ )
     - time `time` (bool), flag for logging time values of functions (when supported)
-    - callback `callback` (string), is the callback code name (`unused`)
+    - callbacks `callback` (string), is the callback code name (`unused`)
     """
 
     from logging import Logger
@@ -37,9 +40,10 @@ class LogConfig(Config):
     def __init__(self, *args, **kwargs):
         # inizialize all variables
         self.verbose: bool = kwargs["verbose"]  # (bool) flag
-        self.debug: bool = kwargs["debug"]  # (bool) flag
+        self.debug: bool = kwargs["debug_log"]  # (bool) flag
         self.time: bool = kwargs["time"]  # (bool) flag
-        self.callback: str = kwargs["callback"]  # (string) call back setting
+        # (string) call back setting
+        self.callbacks: List[str] = self.str_to_list(kwargs["callbacks"])
 
     def set_logger(self, logger: Logger):
         self.logger = logger

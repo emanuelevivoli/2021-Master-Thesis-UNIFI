@@ -47,21 +47,20 @@ import random
 
 from tqdm.auto import tqdm
 
-# 🤗 Datasets 
+# 🤗 Datasets
 import datasets
 from datasets import load_dataset, load_metric
-from .utils.general import load_dataset_wrapper
+from thesis.utils.load_dataset import load_dataset_wrapper
 
-# parsing 
-from .utils.parsers.args_parser import parse_args
+# parsing
+from thesis.parsers.args_parser import parse_args
 
 # dataset managements
-# from torch.utils.data.dataloader import DataLoader
 from torch.utils.data import Dataset, DataLoader
 
 # data managements
-import json # load/write data
-import torch 
+import json  # load/write data
+import torch
 import numpy as np
 import pandas as pd
 
@@ -76,7 +75,7 @@ from accelerate import Accelerator
 import transformers
 from transformers import (
     AdamW,
-    AutoTokenizer, 
+    AutoTokenizer,
     AutoConfig,
     HfArgumentParser,
     TrainingArguments as HfTrainingArguments,
@@ -84,7 +83,7 @@ from transformers import (
     get_scheduler,
     set_seed,
 )
-    
+
 logger = logging.getLogger(__name__)
 
 
@@ -100,24 +99,15 @@ https://huggingface.co/models?filter=masked-lm
 """
 
 # 🤗 Tranformers
-from transformers import (
-    CONFIG_MAPPING,
-    MODEL_MAPPING,
-    AutoModel, 
-    AutoModelForMaskedLM,
-    PreTrainedTokenizer, 
-    DataCollatorForLanguageModeling, 
-    BertForMaskedLM
-)
 
 
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
 DICTIONARY_FIELD_NAMES = dict(
-    train         = ['train'],
-    test          = ['test', 'debug', 'dev'],
-    validation    = ['validation', 'valid']
+    train=['train'],
+    test=['test', 'debug', 'dev'],
+    validation=['validation', 'valid']
 )
 
 
@@ -130,8 +120,9 @@ def main(args_list):
     # ------------------
 
     # Pass the args_list to parse_args. We will use it for args = parse_args(args_list)
-    dataset_args, training_args, s2orc_args, keyph_args, run_args, log_args, embedding_args = parse_args(args_list)
-    
+    dataset_args, training_args, s2orc_args, keyph_args, run_args, log_args, embedding_args = parse_args(
+        args_list)
+
     # ------------------
     # Logging definition
     # ------------------
@@ -148,15 +139,17 @@ def main(args_list):
 
     # Setup logging, we only want one process per machine to log things on the screen.
     # accelerator.is_local_main_process is only True for one process per machine.
-    logger.info(f"Accelerator local main process: {accelerator.is_local_main_process}")
-    logger.setLevel(logging.INFO if accelerator.is_local_main_process else logging.ERROR)
+    logger.info(
+        f"Accelerator local main process: {accelerator.is_local_main_process}")
+    logger.setLevel(
+        logging.INFO if accelerator.is_local_main_process else logging.ERROR)
     if accelerator.is_local_main_process:
         datasets.utils.logging.set_verbosity_warning()
         transformers.utils.logging.set_verbosity_info()
     else:
         datasets.utils.logging.set_verbosity_error()
         transformers.utils.logging.set_verbosity_error()
-    
+
     # TODO Adding the logger:logging.Logger to log_args as *args
     # TODO allowing the LoggingConfig to logs on that Logger
     log_args.logger = logger
@@ -190,7 +183,8 @@ def main(args_list):
         # Getting the load_dataset wrapper that manages huggingface dataset and the custom ones
         custom_load_dataset = load_dataset_wrapper()
         # Loading the raw data based on input (and default) values of arguments
-        raw_datasets = custom_load_dataset(dataset_args, training_args, s2orc_args, keyph_args, run_args, log_args, embedding_args)
+        raw_datasets = custom_load_dataset(
+            dataset_args, training_args, s2orc_args, keyph_args, run_args, log_args, embedding_args)
     else:
         # If the files 'train_file' and 'validation_file' are specified
         # data_files is composed by those elements.
@@ -202,18 +196,18 @@ def main(args_list):
         extension = dataset_args.train_file.split(".")[-1]
         if extension == "txt":
             extension = "text"
-        elif extension == "jsonl": # jsonl files are file with json element per row
+        elif extension == "jsonl":  # jsonl files are file with json element per row
             extension = "json"
         raw_datasets = load_dataset(extension, data_files=data_files)
     # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
     # https://huggingface.co/docs/datasets/loading_datasets.html.
-    
+
     # The Datasets in the raw form can have different form of key names (depending on the configuration).
     # We need all datasets to contain 'train', 'test', 'validation' keys, if not we change the dictionary keys' name
     # based on the `names_tuple` and conseguently on `names_map`.
     def format_key_names(raw_datasets):
         # The creation of `names_map` happens to be here
-        # For every element in the values lists, one dictionary entry is added 
+        # For every element in the values lists, one dictionary entry is added
         # with (k,v): k=Value of the list, v=Key such as 'train', etc.
         def names_dict_generator(names_tuple: dict):
             names_map = dict()
@@ -226,12 +220,12 @@ def main(args_list):
         for split_name in split_names:
             new_split_name = names_map.get(split_name)
             if split_name != new_split_name:
-                raw_datasets[new_split_name] = raw_datasets.pop(split_name)  
+                raw_datasets[new_split_name] = raw_datasets.pop(split_name)
         return raw_datasets
-    
+
     logger.info(f"Formatting DatasetDict keys")
     raw_datasets = format_key_names(raw_datasets)
-    
+
     # ------------------
     # Load tokenizer and
     # pretrained model
@@ -245,12 +239,15 @@ def main(args_list):
         config = AutoConfig.from_pretrained(dataset_args.model_name_or_path)
     else:
         config = CONFIG_MAPPING[training_args.model_type]()
-        logger.warning("You are instantiating a new config instance from scratch.")
+        logger.warning(
+            "You are instantiating a new config instance from scratch.")
 
     if dataset_args.tokenizer_name:
-        tokenizer = AutoTokenizer.from_pretrained(dataset_args.tokenizer_name, use_fast=not dataset_args.use_slow_tokenizer)
+        tokenizer = AutoTokenizer.from_pretrained(
+            dataset_args.tokenizer_name, use_fast=not dataset_args.use_slow_tokenizer)
     elif dataset_args.model_name_or_path:
-        tokenizer = AutoTokenizer.from_pretrained(dataset_args.model_name_or_path, use_fast=not dataset_args.use_slow_tokenizer)
+        tokenizer = AutoTokenizer.from_pretrained(
+            dataset_args.model_name_or_path, use_fast=not dataset_args.use_slow_tokenizer)
     else:
         raise ValueError(
             "You are instantiating a new tokenizer from scratch. This is not supported by this script."
@@ -278,12 +275,14 @@ def main(args_list):
     column_names = raw_datasets["train"].column_names
     if "text" in column_names:
         text_column_name = "text"
-        logger.info(f"Dataset 'train' has 'text' field. It'll be used by the model!")
+        logger.info(
+            f"Dataset 'train' has 'text' field. It'll be used by the model!")
     else:
         text_column_name = column_names[0]
-        logger.info(f"Dataset 'train' hasn't 'text' field. Field {text_column_name} will be used by the model!")
+        logger.info(
+            f"Dataset 'train' hasn't 'text' field. Field {text_column_name} will be used by the model!")
 
-    if training_args.max_seq_length is None:
+    if dataset_args.max_seq_length is None:
         max_seq_length = tokenizer.model_max_length
         if max_seq_length > 1024:
             logger.warning(
@@ -292,20 +291,22 @@ def main(args_list):
             )
             max_seq_length = 1024
     else:
-        if training_args.max_seq_length > tokenizer.model_max_length:
+        if dataset_args.max_seq_length > tokenizer.model_max_length:
             logger.warning(
-                f"The max_seq_length passed ({training_args.max_seq_length}) is larger than the maximum length for the"
+                f"The max_seq_length passed ({dataset_args.max_seq_length}) is larger than the maximum length for the"
                 f"model ({tokenizer.model_max_length}). Using max_seq_length={tokenizer.model_max_length}."
             )
-        max_seq_length = min(training_args.max_seq_length, tokenizer.model_max_length)
+        max_seq_length = min(dataset_args.max_seq_length,
+                             tokenizer.model_max_length)
 
-    if training_args.line_by_line:
+    if dataset_args.line_by_line:
         # When using line_by_line, we just tokenize each nonempty line.
         padding = "max_length" if dataset_args.pad_to_max_length else False
 
         def tokenize_function(examples):
             # Remove empty lines
-            examples["text"] = [line for line in examples["text"] if len(line) > 0 and not line.isspace()]
+            examples["text"] = [line for line in examples["text"]
+                                if len(line) > 0 and not line.isspace()]
             return tokenizer(
                 examples["text"],
                 padding=padding,
@@ -319,9 +320,9 @@ def main(args_list):
         tokenized_datasets = raw_datasets.map(
             tokenize_function,
             batched=True,
-            num_proc=training_args.preprocessing_num_workers,
+            num_proc=dataset_args.preprocessing_num_workers,
             remove_columns=[text_column_name],
-            load_from_cache_file=not training_args.overwrite_cache,
+            load_from_cache_file=not dataset_args.overwrite_cache,
         )
     else:
         # Otherwise, we tokenize every text, then concatenate them together before splitting them in smaller parts.
@@ -333,23 +334,25 @@ def main(args_list):
         tokenized_datasets = raw_datasets.map(
             tokenize_function,
             batched=True,
-            num_proc=training_args.preprocessing_num_workers,
+            num_proc=dataset_args.preprocessing_num_workers,
             remove_columns=column_names,
-            load_from_cache_file=not training_args.overwrite_cache,
+            load_from_cache_file=not dataset_args.overwrite_cache,
         )
 
         # Main data processing function that will concatenate all texts from our dataset and generate chunks of
         # max_seq_length.
         def group_texts(examples):
             # Concatenate all texts.
-            concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
+            concatenated_examples = {
+                k: sum(examples[k], []) for k in examples.keys()}
             total_length = len(concatenated_examples[list(examples.keys())[0]])
             # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
             # customize this part to your needs.
             total_length = (total_length // max_seq_length) * max_seq_length
             # Split by chunks of max_len.
             result = {
-                k: [t[i : i + max_seq_length] for i in range(0, total_length, max_seq_length)]
+                k: [t[i: i + max_seq_length]
+                    for i in range(0, total_length, max_seq_length)]
                 for k, t in concatenated_examples.items()
             }
             return result
@@ -364,8 +367,8 @@ def main(args_list):
         tokenized_datasets = tokenized_datasets.map(
             group_texts,
             batched=True,
-            num_proc=training_args.preprocessing_num_workers,
-            load_from_cache_file=not training_args.overwrite_cache,
+            num_proc=dataset_args.preprocessing_num_workers,
+            load_from_cache_file=not dataset_args.overwrite_cache,
         )
 
     train_dataset = tokenized_datasets["train"]
@@ -373,20 +376,23 @@ def main(args_list):
 
     # Log a few random samples from the training set:
     for index in random.sample(range(len(train_dataset)), 3):
-        logger.info(f"Sample {index} of the training set: {train_dataset[index]}.")
+        logger.info(
+            f"Sample {index} of the training set: {train_dataset[index]}.")
 
     # ------------------
     # Data collator
     # ------------------
 
     # This one will take care of randomly masking the tokens.
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, mlm_probability=training_args.mlm_probability)
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer, mlm=False, mlm_probability=dataset_args.mlm_probability)
 
     # DataLoaders creation:
     train_dataloader = DataLoader(
         train_dataset, shuffle=True, collate_fn=data_collator, batch_size=training_args.per_device_train_batch_size
     )
-    eval_dataloader = DataLoader(eval_dataset, collate_fn=data_collator, batch_size=training_args.per_device_eval_batch_size)
+    eval_dataloader = DataLoader(
+        eval_dataset, collate_fn=data_collator, batch_size=training_args.per_device_eval_batch_size)
 
     # ------------------
     # Optimizer
@@ -404,7 +410,8 @@ def main(args_list):
             "weight_decay": 0.0,
         },
     ]
-    optimizer = AdamW(optimizer_grouped_parameters, lr=training_args.learning_rate)
+    optimizer = AdamW(optimizer_grouped_parameters,
+                      lr=training_args.learning_rate)
 
     # Prepare everything with our `accelerator`.
     model, optimizer, train_dataloader, eval_dataloader = accelerator.prepare(
@@ -415,11 +422,14 @@ def main(args_list):
     # shorter in multiprocess)
 
     # Scheduler and math around the number of training steps.
-    num_update_steps_per_epoch = math.ceil(len(train_dataloader) / training_args.gradient_accumulation_steps)
+    num_update_steps_per_epoch = math.ceil(
+        len(train_dataloader) / training_args.gradient_accumulation_steps)
     if training_args.max_train_steps is None:
-        training_args.max_train_steps = training_args.num_train_epochs * num_update_steps_per_epoch
+        training_args.max_train_steps = training_args.num_train_epochs * \
+            num_update_steps_per_epoch
     else:
-        training_args.num_train_epochs = math.ceil(training_args.max_train_steps / num_update_steps_per_epoch)
+        training_args.num_train_epochs = math.ceil(
+            training_args.max_train_steps / num_update_steps_per_epoch)
 
     lr_scheduler = get_scheduler(
         name=training_args.lr_scheduler_type,
@@ -432,17 +442,23 @@ def main(args_list):
     # 🚀 🚀 🚀 Train !
     # ------------------
 
-    total_batch_size = training_args.per_device_train_batch_size * accelerator.num_processes * training_args.gradient_accumulation_steps
+    total_batch_size = training_args.per_device_train_batch_size * \
+        accelerator.num_processes * training_args.gradient_accumulation_steps
 
     logger.info("***** Running training *****")
     logger.info(f"  Num examples = {len(train_dataset)}")
     logger.info(f"  Num Epochs = {training_args.num_train_epochs}")
-    logger.info(f"  Instantaneous batch size per device = {training_args.per_device_train_batch_size}")
-    logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
-    logger.info(f"  Gradient Accumulation steps = {training_args.gradient_accumulation_steps}")
-    logger.info(f"  Total optimization steps = {training_args.max_train_steps}")
+    logger.info(
+        f"  Instantaneous batch size per device = {training_args.per_device_train_batch_size}")
+    logger.info(
+        f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
+    logger.info(
+        f"  Gradient Accumulation steps = {training_args.gradient_accumulation_steps}")
+    logger.info(
+        f"  Total optimization steps = {training_args.max_train_steps}")
     # Only show the progress bar once on each machine.
-    progress_bar = tqdm(range(training_args.max_train_steps), disable=not accelerator.is_local_main_process)
+    progress_bar = tqdm(range(training_args.max_train_steps),
+                        disable=not accelerator.is_local_main_process)
     completed_steps = 0
 
     for epoch in range(training_args.num_train_epochs):
@@ -469,7 +485,8 @@ def main(args_list):
                 outputs = model(**batch)
 
             loss = outputs.loss
-            losses.append(accelerator.gather(loss.repeat(training_args.per_device_eval_batch_size)))
+            losses.append(accelerator.gather(loss.repeat(
+                training_args.per_device_eval_batch_size)))
 
         losses = torch.cat(losses)
         losses = losses[: len(eval_dataset)]
@@ -480,7 +497,8 @@ def main(args_list):
     if training_args.output_dir is not None:
         accelerator.wait_for_everyone()
         unwrapped_model = accelerator.unwrap_model(model)
-        unwrapped_model.save_pretrained(training_args.output_dir, save_function=accelerator.save)
+        unwrapped_model.save_pretrained(
+            training_args.output_dir, save_function=accelerator.save)
 
 
 # In[ ]:
@@ -491,51 +509,51 @@ if __name__ == "__main__":
     args_list = [
 
         # DatasetArguments
-        "--model_name_or_path"           , "allenai/scibert_scivocab_uncased",
-        "--dataset_name"                 , "s2orc",
-        "--dataset_config_name"          , "full",
-        
-        # TrainingArguments        
-        "--seed"                         , '1234', # seed for reproducibility of experiments
-        "--output_dir"                   , "output",
-        "--debug"                        , 'False',
-        
-        "--run_name"                     , "scibert-s2orc",
-        "--num_train_epochs"             , '1',
-        "--per_device_train_batch_size"  , "32",
-        "--per_device_eval_batch_size"   , "32",
-        "--max_seq_length"               , '512', # cistom added
-        
+        "--model_name_or_path", "allenai/scibert_scivocab_uncased",
+        "--dataset_name", "s2orc",
+        "--dataset_config_name", "full",
+
+        # TrainingArguments
+        "--seed", '1234',  # seed for reproducibility of experiments
+        "--output_dir", "output",
+        "--debug", 'False',
+
+        "--run_name", "scibert-s2orc",
+        "--num_train_epochs", '1',
+        "--per_device_train_batch_size", "32",
+        "--per_device_eval_batch_size", "32",
+        "--max_seq_length", '512',  # cistom added
+
         # S2orcArguments & KeyPhArguments
-        "--dataset_path"                 , "/home/vivoli/Thesis/data",
-        
+        "--dataset_path", "/home/vivoli/Thesis/data",
+
         # S2orcArguments
-        "--idxs"                         , '0',
-        "--zipped"                       , 'True',
-        "--mag_field_of_study"           , "Computer Science", # list
-        "--data"                         , "abstract", # list
-        "--target"                       , "title", # list
-            # Field for classification
-        "--classes"                      , "mag_field_of_study", # list
-            # Cleaning dataset with none fields & unused columns
-        "--keep_none_papers"             , 'False',
-        "--keep_unused_columns"          , 'False',
-        
+        "--idxs", '0',
+        "--zipped", 'True',
+        "--mag_field_of_study", "Computer Science",  # list
+        "--data", "abstract",  # list
+        "--target", "title",  # list
+        # Field for classification
+        "--classes", "mag_field_of_study",  # list
+        # Cleaning dataset with none fields & unused columns
+        "--keep_none_papers", 'False',
+        "--keep_unused_columns", 'False',
+
         # RunArguments
         # "--run_name"                     , "scibert-s2orc",
-        "--run_number"                   , '0',
-        "--run_iteration"                , '0',
-        
+        "--run_number", '0',
+        "--run_iteration", '0',
+
         # LoggingArguments
-        "--verbose"                      , 'True',
+        "--verbose", 'True',
         # "--debug"                        , False,
-        "--time"                         , 'False',
-        "--callback"                     , "WandbCallback",
-        
+        "--time", 'False',
+        "--callback", "WandbCallback",
+
         # EmbeddingArguments
         # "--max_seq_length"               , '512',
         # "--pooling"                      , 'none',
         # "--batch_size"                   , '32'
     ]
-    
+
     main(args_list)

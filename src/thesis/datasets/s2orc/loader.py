@@ -4,18 +4,18 @@ from datasets import (
     DatasetDict,
 )
 
-from .preprocessing import get_dataset
+from thesis.datasets.s2orc.preprocessing import get_dataset
 
-from .read_dataset import s2orc_multichunk_read
+from thesis.datasets.s2orc.read_dataset import s2orc_multichunk_read
 
 # Dataset configuration files
-from ..config.datasets import S2orcConfig, KeyPHConfig
+from thesis.config.datasets import S2orcConfig, KeyPHConfig
 
-from ..config.execution import RunConfig, LogConfig
+from thesis.config.execution import RunConfig, LogConfig
 
-from ..config.base import fingerprints
+from thesis.config.base import fingerprints
 
-from ..cache import no_caching, _caching
+from thesis.utils.cache import no_caching, _caching
 
 
 def s2ortc_loader(
@@ -36,7 +36,12 @@ def s2ortc_loader(
         - all_datasets: `DatasetDict`, dictionary with fields `train`, `test`, `valid` and `Dataset` values. \
     """
 
-    toread_meta_s2orc, toread_pdfs_s2orc = dataset_config.memory_save_pipelines()
+    # print(dataset_config)
+
+    toread_meta_s2orc, toread_pdfs_s2orc = dataset_config.memory_save_pipelines(
+        log_config.verbose)
+
+    # print(toread_meta_s2orc, toread_pdfs_s2orc)
 
     # for everychunk we get an element composed by 4 elements:
     multichunks_lists = s2orc_multichunk_read(
@@ -49,7 +54,7 @@ def s2ortc_loader(
 
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
     @no_caching(
-        dictionary_columns, **fingerprints(dataset_config, run_config, log_config)
+        dictionary_columns, **fingerprints(dataset_config, run_config, log_config), function_name='s2ortc_loader'
     )
     def custom_to_dataset_list(
         multichunks_lists, dataset_config, run_config, log_config, dictionary_columns
@@ -69,6 +74,8 @@ def s2ortc_loader(
     datasets = custom_to_dataset_list(
         multichunks_lists, dataset_config, run_config, log_config, dictionary_columns
     )
+
+    # print(datasets)
 
     # concatenation of all dataset to form one single dataset
     all_datasets: DatasetDict = DatasetDict(

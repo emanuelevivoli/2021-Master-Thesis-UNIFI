@@ -6,20 +6,20 @@ from transformers import PreTrainedTokenizer
 
 from typing import List
 
-from .read_dataset import json_journal_read
+from thesis.datasets.journals.read_dataset import json_journal_read
 
 # Dataset configuration files
-from ..config.datasets import JurNLConfig
+from thesis.config.datasets import JouRNConfig
 
-from ..config.execution import RunConfig, LogConfig
+from thesis.config.execution import RunConfig, LogConfig
 
-from ..config.base import fingerprints
+from thesis.config.base import fingerprints
 
-from ..cache import no_caching, _caching
+from thesis.utils.cache import no_caching, _caching
 
 
 def journal_loader(
-    dataset_config: JurNLConfig,
+    dataset_config: JouRNConfig,
     run_config: RunConfig,
     log_config: LogConfig,
     *args,
@@ -27,7 +27,7 @@ def journal_loader(
 ) -> DatasetDict:
     """ Loader function for the journal dataset. It can load muiltiple datasets, concatenate them and return as one single dataset:
     + Args:
-        - dataset_config: `JurNLConfig`, configuration for journal dataset.
+        - dataset_config: `JouRNConfig`, configuration for journal dataset.
         - run_config: `RunConfig`, configuration for running experiments.
         - *args: `args list`, some extra params not used.
         - **kwargs: `kwargs dict`, some extra dictionary params not used.
@@ -40,7 +40,7 @@ def journal_loader(
 
     # TODO #
     def filter_dataset(
-        dataset_config: JurNLConfig, log_config: LogConfig, datasets: List[Dataset]
+        dataset_config: JouRNConfig, log_config: LogConfig, datasets: List[Dataset]
     ):
         # TODO # Filter datasets elements based on some arguments
         # TODO # (mag_field_of_studies or journals)

@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 
 
 def fingerprints(*args) -> List[Dict]:
@@ -15,14 +15,15 @@ class Config:
     - get_fingerprint `abstract method` that return a `Dict`
     """
 
+    def str_to_list(self, string: str) -> List[Union[str, int]]:
+        result = None
+        if len(string) == 0:
+            result = []
+        elif "," in string:
+            result = string.split(",")
+        else:
+            result = [string]
+        return result
+
     def get_fingerprint(self) -> Dict:
         pass
-
-
-# SingleChunk = {
-#     # {'metadata': [], 'pdf_parses': [], 'meta_key_idx': {}, 'pdf_key_idx': {}}
-#     'metadata':  [],
-#     'pdf_parses': [],
-#     'meta_key_idx': {},
-#     'pdf_key_idx': {}
-# }

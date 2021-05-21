@@ -2,8 +2,8 @@ import os
 import subprocess
 import logging
 from typing import List, Union, Dict
-from ..cache import _caching
-from .base import Config
+from thesis.utils.cache import _caching, no_caching
+from thesis.config.base import Config
 
 DATASET_PATH = "/home/vivoli/Thesis/data"
 CUSTOM_DATASETS = ["s2orc", "keyphrase"]
@@ -13,7 +13,7 @@ S2ORC_TYPES = ["sample", "full"]
 KEYPH_TYPES = ["inspec", "krapivin", "nus",
                "semeval", "kp20k", "duc", "stackexchange"]
 
-JURNL_TYPES = ["icdar_19", "icpr_20", "ijdar_20"]
+JOURN_TYPES = ["icdar_19", "icpr_20", "ijdar_20"]
 
 
 class CustomConfig(Config):
@@ -26,10 +26,10 @@ class CustomConfig(Config):
     def __init__(self, *args, **kwargs):
         self.dataset_path: str = kwargs["dataset_path"]
 
-    def str_to_list(self, string: str) -> List[Union[str, int]]:
-        return (
-            string.split(",") if "," in string else [string]
-        )  # string.split(' ') if ' ' in string else
+    # def str_to_list(self, string: str) -> List[Union[str, int]]:
+    #     return (
+    #         string.split(",") if "," in string else [string]
+    #     )  # string.split(' ') if ' ' in string else
 
 
 class S2orcConfig(CustomConfig):
@@ -94,16 +94,20 @@ class S2orcConfig(CustomConfig):
 
         self.s2orc_type: str = kwargs[
             "dataset_config_name"
-        ]  # options are 'sample' or 'full'
-        self.idxs: list = self.str_to_list(
-            kwargs["idxs"]
-        )  # options are empty List() [for sample] or List(int) [for full]
-        self.zipped: bool = kwargs[
-            "zipped"
-        ]  # if False, only idxs for unzipped files. if True, we extract idxs files
+        ]
+        if self.s2orc_type == 'sample':
+            self.idxs: list = []
+            self.zipped: bool = False
+
+        elif self.s2orc_type == 'full':
+            self.idxs: list = self.str_to_list(kwargs["idxs"])
+            self.zipped: bool = kwargs["zipped"]
+
+        self.extention = "jsonl.gz" if self.zipped else "jsonl"
+
         self.mag_field_of_study: list = self.str_to_list(
-            kwargs["mag_field_of_study"]
-        )  # options are empty List() or List(string)
+            kwargs["mag_field_of_study"])
+        # if mag is not None else mag  # options are empty List() or List(string)
         self.dictionary_input: dict = {
             "data": self.str_to_list(kwargs["data"]),
             "target": self.str_to_list(kwargs["target"]),
@@ -116,8 +120,6 @@ class S2orcConfig(CustomConfig):
 
         # path for the dataset
         self.path: str = f"{self.dataset_path}/s2orc-{self.s2orc_type}-20200705v1/{self.s2orc_type}"
-
-        self.extention = "jsonl.gz" if self.zipped else "jsonl"
 
         # print(self.idxs)
         # print(self.mag_field_of_study)
@@ -161,7 +163,7 @@ class S2orcConfig(CustomConfig):
         # self.toread_pdfs_s2orc = []
 
     def get_filenames(self, verbose=False):
-        @_caching(
+        @no_caching(
             idxs=self.idxs, s2orc_type=self.s2orc_type, function_name="get_filenames"
         )
         def _get_filenames(idxs, s2orc_type):
@@ -202,10 +204,10 @@ class S2orcConfig(CustomConfig):
     def get_completed_filenames(self, verbose=False):
 
         # prerequisites
-        self.get_extention()
-        self.get_filenames()
+        self.get_extention(verbose)
+        self.get_filenames(verbose)
 
-        @_caching(
+        @no_caching(
             extention=self.extention,
             metadata_filenames=self.metadata_filenames,
             pdf_parses_filenames=self.pdf_parses_filenames,
@@ -246,8 +248,7 @@ class S2orcConfig(CustomConfig):
         def filter_by_extention(files_list):
             return list(
                 filter(
-                    lambda file_name: file_name[-len(self.extention)
-                                                     :] == self.extention,
+                    lambda file_name: file_name[-len(self.extention):] == self.extention,
                     files_list,
                 )
             )
@@ -268,18 +269,18 @@ class S2orcConfig(CustomConfig):
         self.get_existance(verbose)
         # metadata_output, pdf_parses_output = self.get_existance(verbose)
         if verbose:
-            logging.info(
+            print(
                 f"Meta_output: {self.metadata_output} and Pdfs_output: {self.pdf_parses_output}"
             )
 
-        self.get_completed_filenames()
+        self.get_completed_filenames(verbose)
         # completed_metadata_filenames, completed_pdf_parses_filenames = self.get_completed_filenames()
         if verbose:
-            logging.info(
+            print(
                 f"Meta_completed: {self.completed_metadata_filenames} and Pdfs_completed:{self.completed_pdf_parses_filenames}"
             )
 
-        @_caching(
+        @no_caching(
             metadata_output=self.metadata_output,
             pdf_parses_output=self.pdf_parses_output,
             completed_metadata_filenames=self.completed_metadata_filenames,
@@ -380,16 +381,16 @@ class KeyPHConfig(CustomConfig):
         return self.types_to_task[key]
 
 
-class JurNLConfig(CustomConfig):
-    """JurNLConfig Configuration class (For journal papers).
+class JouRNConfig(CustomConfig):
+    """JouRNConfig Configuration class (For journal papers).
 
     Properties:
-    - types (`unused`), `JURNL_TYPES` list composed (eg. 'icdar_19' 'icpr_20', 'ijdar_20')
-    - jurnl_type 'dataset_config_name' (`List[str]`) ( one of the `types` above)
+    - types (`unused`), `JOURN_TYPES` list composed (eg. 'icdar_19' 'icpr_20', 'ijdar_20')
+    - journ_type 'dataset_config_name' (`List[str]`) ( one of the `types` above)
     - path (str), actually, depending on the `s2orc_type` choosed, it is: "`dataset_path`/keyphrases/`type` for every s2orc_type (if multiple)"
     """
 
-    types: List[str] = JURNL_TYPES
+    types: List[str] = JOURN_TYPES
     types_to_task: dict = dict(
         # filename, title, abstract, custom_class
         icdar_19=['clas', 'regr', 'emb', 'summ'],
@@ -403,15 +404,15 @@ class JurNLConfig(CustomConfig):
         # inizialize the main dataset path
         super().__init__(*args, **kwargs)
 
-        self.jurnl_type: List[str] = self.str_to_list(
+        self.journ_type: List[str] = self.str_to_list(
             kwargs["dataset_config_name"]
         )  # options are single choice 'inspec' or multiple 'krapivin,nus,semeval,kp20k'
         # path for the dataset
-        # need to be appended {type} for every self.jurnl_type
+        # need to be appended {type} for every self.journ_type
         self.path: str = f"{self.dataset_path}/s2orc-journal/"
 
     def get_fingerprint(self) -> Dict:
-        return dict({"jurnl_type": self.jurnl_type, "path": self.path})
+        return dict({"journ_type": self.journ_type, "path": self.path})
 
     def get_tasks_by_key(self, key: str):
         return self.types_to_task[key]

@@ -14,15 +14,16 @@ from torch.utils.data import Dataset, DataLoader
 
 import time
 import numpy as np
-from .mag_field import mag_field_dict
 
-from typing import Dict, List
+from thesis.datasets.s2orc.mag_field import mag_field_dict
 
-from ..cache import no_caching, _caching
+from thesis.config.base import fingerprints, Config
+from thesis.config.datasets import S2orcConfig
+from thesis.config.execution import RunConfig, LogConfig
 
-from ..config.base import fingerprints, Config  # , SingleChunk
-from ..config.datasets import S2orcConfig
-from ..config.execution import RunConfig, LogConfig
+from thesis.utils.cache import no_caching, _caching
+
+import logging
 
 
 def key_value_sort(dictionary: Dict) -> List:
@@ -46,19 +47,22 @@ def fuse_dictionaries(
     ) -> Dataset:
 
         if log_config.verbose:
-            print(f"[INFO] len meta single_chunk: {len(single_chunk['metadata'])}")
+            logging.info(
+                f"[INFO] len meta single_chunk: {len(single_chunk['metadata'])}")
         if log_config.verbose:
-            print(f"[INFO] len pdfs single_chunk: {len(single_chunk['pdf_parses'])}")
+            logging.info(
+                f"[INFO] len pdfs single_chunk: {len(single_chunk['pdf_parses'])}")
 
         paper_list = []
         for key in single_chunk["meta_key_idx"]:
 
             if log_config.debug:
-                print(f"[INFO] Analyse metadata dictionary for paper {key}")
+                logging.info(
+                    f"[INFO] Analyse metadata dictionary for paper {key}")
             # get metadata dictionary for paper with paper_id: key
             meta_index = single_chunk["meta_key_idx"].get(key, None)
             if log_config.debug:
-                print(f"       meta_index: {meta_index}")
+                logging.info(f"       meta_index: {meta_index}")
             metadata = (
                 single_chunk["metadata"][meta_index]
                 if meta_index is not None
@@ -66,11 +70,12 @@ def fuse_dictionaries(
             )
 
             if log_config.debug:
-                print(f"[INFO] Analyse pdf_parses dictionary for paper {key}")
+                logging.info(
+                    f"[INFO] Analyse pdf_parses dictionary for paper {key}")
             # get pdf_parses dictionary for paper with paper_id: key
             pdf_index = single_chunk["pdf_key_idx"].get(key, None)
             if log_config.debug:
-                print(f"       pdf_index: {pdf_index}")
+                logging.info(f"       pdf_index: {pdf_index}")
             pdf_parses = (
                 single_chunk["pdf_parses"][pdf_index]
                 if pdf_index is not None
@@ -115,17 +120,18 @@ def fuse_dictionaries(
 
                 if type(pdf_field) == list:
                     pdf_field = " ".join(
-                        [s2orcBaseElement(elem).get_text() for elem in pdf_field]
+                        [s2orcBaseElement(elem).get_text()
+                         for elem in pdf_field]
                     )
 
                 return meta_field if not_None(meta_field) else pdf_field
 
             if log_config.debug:
-                print(f"[INFO] Start fusion for paper {key}")
+                logging.info(f"[INFO] Start fusion for paper {key}")
             paper = dict()
             for field in data_field:
                 if log_config.debug:
-                    print(
+                    logging.info(
                         f"[INFO] Fusing field {field} for meta ({metadata.get(field, None)}) and pdf_parses ({pdf_parses.get(field, None)})"
                     )
                 paper[field] = fuse_field(
@@ -135,7 +141,7 @@ def fuse_dictionaries(
             paper_list.append(paper)
 
             if log_config.debug:
-                print(f"[INFO] Deleting meta and pdf for paper {key}")
+                logging.info(f"[INFO] Deleting meta and pdf for paper {key}")
             #  if meta_index is not None: del single_chunk['metadata'][meta_index]
             # if pdf_index is not None: del single_chunk['pdf_parses'][pdf_index]
 
@@ -165,7 +171,7 @@ def get_dataset(
     :return: a dictionary containing train, test, validation dataloaders
     """
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
-    @_caching(
+    @no_caching(
         key_value_sort(single_chunk["meta_key_idx"]),
         key_value_sort(single_chunk["pdf_key_idx"]),
         **fingerprints(dataset_config, run_config, log_config),
@@ -187,18 +193,18 @@ def get_dataset(
         if log_config.time:
             start_load = time.time()
 
-        ## execution
+        # execution
         dataset_dict = fuse_dictionaries(single_chunk, data_field, log_config)
 
-        #  print(dataset_dict)
+        #  logging.info(dataset_dict)
 
         if log_config.debug:
-            print(dataset_dict)
+            logging.info(dataset_dict)
 
         if log_config.time:
             end_load = time.time()
         if log_config.time:
-            print(f"[TIME] load_dataset: {end_load - start_load}")
+            logging.info(f"[TIME] load_dataset: {end_load - start_load}")
 
         ## ------------------ ##
         ## ---- MANAGING ---- ##
@@ -206,15 +212,16 @@ def get_dataset(
         if log_config.time:
             start_selection = time.time()
 
-        ## execution
+        # execution
         dataset = dataset_dict  # ['train']
 
         if log_config.time:
             end_selection = time.time()
         if log_config.time:
-            print(f"[TIME] dataset_train selection: {end_selection - start_selection}")
+            logging.info(
+                f"[TIME] dataset_train selection: {end_selection - start_selection}")
         if log_config.debug:
-            print(dataset)
+            logging.info(dataset)
 
         ## ------------------ ##
         ## --- REMOVE none -- ##
@@ -230,9 +237,9 @@ def get_dataset(
             if log_config.time:
                 start_removing_indexes = time.time()
             if log_config.debug:
-                print(data_field)
+                logging.info(data_field)
 
-            ## execution
+            # execution
             none_papers_indexes = {}
             for field in data_field:
                 none_indexes = [
@@ -246,11 +253,11 @@ def get_dataset(
             if log_config.time:
                 end_removing_indexes = time.time()
             if log_config.time:
-                print(
+                logging.info(
                     f"[TIME] remove.indexes: {end_removing_indexes - start_removing_indexes}"
                 )
             if log_config.debug:
-                print(none_papers_indexes)
+                logging.info(none_papers_indexes)
 
             ## --------------------- ##
             ## --- REMOVE.concat --- ##
@@ -258,19 +265,20 @@ def get_dataset(
             if log_config.time:
                 start_removing_concat = time.time()
 
-            ## execution
+            # execution
             to_remove_indexes = list(none_papers_indexes.keys())
 
             if log_config.time:
                 end_removing_concat = time.time()
             if log_config.time:
-                print(
+                logging.info(
                     f"[TIME] remove.concat: {end_removing_concat - start_removing_concat}"
                 )
             if log_config.debug:
-                print(to_remove_indexes)
+                logging.info(to_remove_indexes)
             if log_config.debug:
-                print([dataset["abstract"][i] for i in to_remove_indexes])
+                logging.info([dataset["abstract"][i]
+                             for i in to_remove_indexes])
 
             ## --------------------- ##
             ## --- REMOVE.filter --- ##
@@ -278,7 +286,7 @@ def get_dataset(
             if log_config.time:
                 start_removing_filter = time.time()
 
-            ## execution
+            # execution
             dataset = dataset.filter(
                 (lambda x, ids: none_papers_indexes.get(ids, True)), with_indices=True
             )
@@ -286,16 +294,17 @@ def get_dataset(
             if log_config.time:
                 end_removing_filter = time.time()
             if log_config.time:
-                print(
+                logging.info(
                     f"[TIME] remove.filter: {end_removing_filter - start_removing_filter}"
                 )
             if log_config.debug:
-                print(dataset)
+                logging.info(dataset)
 
         if log_config.time:
             end_removing = time.time()
         if log_config.time:
-            print(f"[TIME] remove None fields: {end_removing - start_removing}")
+            logging.info(
+                f"[TIME] remove None fields: {end_removing - start_removing}")
 
         ## --------------------- ##
         ## --- REMOVE.column --- ##
@@ -307,13 +316,13 @@ def get_dataset(
             for column in dataset.column_names:
                 if column not in data_field:
                     if log_config.debug:
-                        print(f"{column}")
+                        logging.info(f"{column}")
                     dataset.remove_columns_(column)
 
         if log_config.time:
             end_remove_unused_columns = time.time()
         if log_config.time:
-            print(
+            logging.info(
                 f"[TIME] remove.column: {end_remove_unused_columns - start_remove_unused_columns}"
             )
 
@@ -324,13 +333,14 @@ def get_dataset(
             start_first_split = time.time()
 
         # 80% (train), 20% (test + validation)
-        ## execution
-        train_testvalid = dataset.train_test_split(test_size=0.2, seed=run_config.seed)
+        # execution
+        train_testvalid = dataset.train_test_split(
+            test_size=0.2, seed=run_config.seed)
 
         if log_config.time:
             end_first_split = time.time()
         if log_config.time:
-            print(
+            logging.info(
                 f"[TIME] first [train-(test-val)] split: {end_first_split - start_first_split}"
             )
 
@@ -341,7 +351,7 @@ def get_dataset(
             start_second_split = time.time()
 
         # 10% of total (test), 10% of total (validation)
-        ## execution
+        # execution
         test_valid = train_testvalid["test"].train_test_split(
             test_size=0.5, seed=run_config.seed
         )
@@ -349,11 +359,11 @@ def get_dataset(
         if log_config.time:
             end_second_split = time.time()
         if log_config.time:
-            print(
+            logging.info(
                 f"[TIME] second [test-val] split: {end_second_split - start_second_split}"
             )
 
-        ## execution
+        # execution
         dataset = DatasetDict(
             {
                 "train": train_testvalid["train"],
@@ -364,7 +374,7 @@ def get_dataset(
         if log_config.time:
             end = time.time()
         if log_config.time:
-            print(f"[TIME] TOTAL: {end - start}")
+            logging.info(f"[TIME] TOTAL: {end - start}")
 
         return dataset
 
@@ -394,14 +404,15 @@ def data_target_preprocess(
     """
 
     if debug:
-        print(f"[INFO-START] Preprocess on data: {data}, target: {target}")
+        logging.info(
+            f"[INFO-START] Preprocess on data: {data}, target: {target}")
 
     assert data == ["abstract"], "data should be ['abstract']"
     if debug:
-        print(data)
+        logging.info(data)
     assert target == ["title"], "target should be ['title']"
     if debug:
-        print(target)
+        logging.info(target)
 
     data_columns_len = len(data)
     target_columns_len = len(target)
@@ -409,16 +420,17 @@ def data_target_preprocess(
 
     assert data_columns_len == 1, "data length should be 1"
     if debug:
-        print(data_columns_len)
+        logging.info(data_columns_len)
     assert target_columns_len == 1, "target length should be 1"
     if debug:
-        print(target_columns_len)
+        logging.info(target_columns_len)
 
     sentences_by_column = np.asarray(sentences_by_column)
     input_columns_len = len(sentences_by_column)
 
     if debug:
-        print(f"all sentences (len {input_columns_len}): {sentences_by_column}")
+        logging.info(
+            f"all sentences (len {input_columns_len}): {sentences_by_column}")
 
     if target_columns_len == 0:
         raise NameError(
@@ -432,9 +444,9 @@ def data_target_preprocess(
     ]  # if columns_len == input_columns_len else sentences_by_column[data_columns_len:-1]
 
     if debug:
-        print(data_sentences)
+        logging.info(data_sentences)
     if debug:
-        print(target_sentences)
+        logging.info(target_sentences)
 
     # The sequences are not padded here. we leave that to the dataloader in a collate_fn
     # ----------------------------------------------- #
@@ -442,7 +454,7 @@ def data_target_preprocess(
     # ----------------------------------------------- #
     # That means: a bit slower processing, but a smaller saved dataset size
     if print_some_debug:
-        print(max_seq_length)
+        logging.info(max_seq_length)
 
     data_encoded_d = tokenizer(
         text=data_sentences.tolist(),
@@ -475,9 +487,9 @@ def data_target_preprocess(
     )
 
     if debug:
-        print(data_encoded_d["input_ids"].shape)
+        logging.info(data_encoded_d["input_ids"].shape)
     if debug:
-        print(target_encoded_d["input_ids"].shape)
+        logging.info(target_encoded_d["input_ids"].shape)
     # return encoded_d
 
     return {
@@ -494,25 +506,25 @@ def mag_preprocess(*mags):
     debug = False
 
     if debug:
-        print(f"[INFO-START] Mag Preprocess")
+        logging.info(f"[INFO-START] Mag Preprocess")
 
     mag_field = np.array(mags)
     input_columns_len = mag_field.shape
     if debug:
-        print(f"pre flatten (len {input_columns_len}): {mag_field}")
+        logging.info(f"pre flatten (len {input_columns_len}): {mag_field}")
     if debug:
-        print(f"pre types: {[type(ele) for ele in mag_field]}")
+        logging.info(f"pre types: {[type(ele) for ele in mag_field]}")
     if debug:
-        print(f"pre types: {type(mag_field)}")
+        logging.info(f"pre types: {type(mag_field)}")
 
     mag_field = mag_field.flatten()
     input_columns_len = mag_field.shape
     if debug:
-        print(f"after flatten (len {input_columns_len}): {mag_field}")
+        logging.info(f"after flatten (len {input_columns_len}): {mag_field}")
     if debug:
-        print(f"after types: {[type(ele) for ele in mag_field]}")
+        logging.info(f"after types: {[type(ele) for ele in mag_field]}")
     if debug:
-        print(f"after types: {type(mag_field)}")
+        logging.info(f"after types: {type(mag_field)}")
 
     mag_field = np.array(
         [ele if type(ele) == str else list(ele)[0] for ele in mag_field]
@@ -525,11 +537,11 @@ def mag_preprocess(*mags):
         )
 
     if debug:
-        print(mag_field)
+        logging.info(mag_field)
     if debug:
-        print(mag_field_dict)
+        logging.info(mag_field_dict)
     if debug:
-        print(
+        logging.info(
             [
                 mag_field_dict.get(real_mag_field_value, 3)
                 for real_mag_field_value in mag_field
@@ -544,7 +556,7 @@ def mag_preprocess(*mags):
     )
 
     if debug:
-        print(mag_index)
+        logging.info(mag_index)
 
     return {"mag_index": mag_index}
 
