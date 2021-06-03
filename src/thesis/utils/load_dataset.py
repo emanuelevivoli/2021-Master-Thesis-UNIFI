@@ -1,7 +1,6 @@
 import logging
 
 from datasets.load import load_dataset
-from dataclasses import asdict
 
 from thesis.config.datasets import S2orcConfig, KeyPHConfig, JouRNConfig
 from thesis.config.execution import RunConfig, LogConfig
@@ -11,39 +10,41 @@ from thesis.datasets.keyph.loader import keyph_loader
 from thesis.datasets.journals.loader import journal_loader
 
 # Parsers
-from thesis.parsers.defaults import (
-    DataTrainingArguments,
-    TrainingArguments,
-)
-from thesis.parsers.customs import (
-    ModelArguments,
-    RunArguments,
-    LoggingArguments,
-    EmbeddingArguments,
-)
+from thesis.parsers.classes import Args
+from thesis.parsers.utils import split_args
+
+from thesis.utils.cache import _caching
+
+
+def custom_load_dataset(all_args: Args, *args, **kwargs):
+    dataset_args = split_args(all_args)[0]
+
+    @_caching(
+        **dataset_args.to_dict(),
+        function_name='custom_load_dataset'
+    )
+    def _custom_load_dataset(all_args: Args, *args, **kwargs):
+        loader = load_dataset_wrapper()
+        return loader(all_args, *args, **kwargs)
+
+    return _custom_load_dataset(all_args, *args, **kwargs)
 
 
 def load_dataset_wrapper():
     def __call__(
-        dataset_args: DataTrainingArguments,
-        training_args: TrainingArguments,
-        # s2orc_args: S2orcArguments,
-        # keyph_args: KeyPhArguments,
-        # journ_args: JournArguments,
-        model_args: ModelArguments,
-        run_args: RunArguments,
-        log_args: LoggingArguments,
-        embedding_args: EmbeddingArguments,
+        all_args: Args,
         *args,
         **kwargs,
     ):
+        dataset_args, training_args, model_args, embedding_args, visual_args, run_args, log_args = split_args(
+            all_args)
 
         logging.info(f"The wrapper has started")
         run_config: RunConfig = RunConfig(
-            *args, **asdict(run_args), **asdict(training_args), **kwargs
+            *args, **run_args.to_dict(), **training_args.to_dict(), **kwargs
         )
         log_config: LogConfig = LogConfig(
-            *args, **asdict(log_args), **asdict(training_args), **kwargs
+            *args, **log_args.to_dict(), **training_args.to_dict(), **kwargs
         )
 
         if dataset_args.dataset_name == "s2orc":
@@ -52,7 +53,7 @@ def load_dataset_wrapper():
             )
             # analyze s2orc dataset configuration
             dataset_config: S2orcConfig = S2orcConfig(
-                *args, **asdict(dataset_args), **asdict(model_args), **kwargs
+                *args, **dataset_args.to_dict(), **model_args.to_dict(), **kwargs
             )
 
             raw_datasets = s2ortc_loader(
@@ -65,7 +66,7 @@ def load_dataset_wrapper():
             )
             # analyze keyph dataset configuration
             dataset_config: KeyPHConfig = KeyPHConfig(
-                *args, **asdict(dataset_args), **asdict(model_args), **kwargs
+                *args, **dataset_args.to_dict(), **model_args.to_dict(), **kwargs
             )
 
             raw_datasets = keyph_loader(
@@ -78,7 +79,7 @@ def load_dataset_wrapper():
             )
             # analyze s2orc dataset configuration
             dataset_config: JouRNConfig = JouRNConfig(
-                *args, **asdict(dataset_args), **asdict(model_args), **kwargs
+                *args, **dataset_args.to_dict(), **model_args.to_dict(), **kwargs
             )
 
             raw_datasets = journal_loader(
@@ -109,6 +110,6 @@ def load_dataset_wrapper():
 
         logging.info(f"The wrapper has ended")
 
-        return raw_datasets
+        return raw_datasets  # , (dataset_config, run_config, log_config)
 
     return __call__

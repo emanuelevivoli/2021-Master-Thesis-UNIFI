@@ -53,8 +53,10 @@ def s2ortc_loader(
     dictionary_columns = sum(dictionary_input.values(), [])
 
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
-    @no_caching(
-        dictionary_columns, **fingerprints(dataset_config, run_config, log_config), function_name='s2ortc_loader'
+    @_caching(
+        dictionary_columns,
+        **fingerprints(dataset_config, run_config, log_config),
+        function_name='s2ortc_loader'
     )
     def custom_to_dataset_list(
         multichunks_lists, dataset_config, run_config, log_config, dictionary_columns

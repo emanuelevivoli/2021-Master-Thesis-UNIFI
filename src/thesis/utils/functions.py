@@ -1,5 +1,4 @@
 import logging
-from datasets import concatenate_datasets
 import yaml
 import json
 
@@ -50,10 +49,6 @@ def range_from_N(s2orc_type, _n, _to, _into):
         )
 
     return list_range
-
-
-def fuse_datasets_splits(datasets):
-    return concatenate_datasets([datasets[key] for key in datasets.keys()])
 
 
 def get_dict_args(path_to_yaml):

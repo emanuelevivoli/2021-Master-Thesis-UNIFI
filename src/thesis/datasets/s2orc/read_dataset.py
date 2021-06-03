@@ -209,7 +209,7 @@ def s2orc_chunk_read(
         logging.info("[          ] Pdf parses Chunk read: ",
                      pdfs_s2orc_single_file)
 
-    @no_caching(
+    @_caching(
         dataset_config=dataset_config,
         meta_s2orc_single_file=meta_s2orc_single_file,
         pdfs_s2orc_single_file=pdfs_s2orc_single_file,
@@ -331,7 +331,7 @@ def s2orc_multichunk_read(
         )
 
     # **(dataset_config.get_configuration())
-    @no_caching(
+    @_caching(
         sorted(toread_meta_s2orc),
         sorted(toread_pdfs_s2orc),
         **fingerprints(dataset_config),

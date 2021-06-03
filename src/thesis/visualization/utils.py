@@ -12,46 +12,49 @@ def generate_name(args_):
     name = f'd:{datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}_'
     extention = '.png'
 
+    model_args = args_.model
+    visual_args = args_.visual
+
     # PAPER FIELDs
-    name += f"Fie::{args_.fields}_"
+    name += f"Fie::{':'.join(visual_args.fields)}_"
 
     # EMBEDDING network
-    name += f"Net::{args_.model_name_or_path}_"
+    name += f"Net::{model_args.model_name_or_path.replace('/', ':').replace('_', '.')}_"
 
     # PRE
-    name += f"PREa::{args_.pre_alg}:"
-    if args_.pre_alg == 'none':
+    name += f"PREa::{visual_args.pre.choice}:"
+    if visual_args.pre.choice == 'none':
         name = name
 
-    if args_.pre_alg == 'umap':
-        name += f'{args_.pre_n_neighbors}:{args_.pre_n_components}:{args_.pre_metric}_'
+    if visual_args.pre.choice == 'UMAP':
+        name += f'{visual_args.pre.umap.n_neighbors}:{visual_args.pre.umap.n_components}:{visual_args.pre.umap.metric}_'
 
-    elif args_.pre_alg == 'pca':
-        name += f'{args_.pre_n_components}_'
+    elif visual_args.pre.choice == 'PCA':
+        name += f'{visual_args.pre.pca.n_components}_'
 
-    elif args_.pre_alg == 'tsne':
-        # name += f'{args_.pre_perplexity}_{args_.pre_n_components}_'
-        name += f'{args_.pre_n_components}_'
+    elif visual_args.pre.choice == 'TSNE':
+        # name += f'{visual_args.pre..tsne.perplexity}_{visual_args.pre..tsne.metric}_'
+        name += f'{visual_args.pre.tsne.n_components}_'
 
     # CLUSTER
-    name += f"Clu::{args_.clustering_alg}:"
-    if args_.clustering_alg == 'kmeans':
-        name += f'{args_.n_clusters}_'
+    name += f"Clu::{visual_args.clust.choice}:"
+    if visual_args.clust.choice == 'kmeans':
+        name += f'{visual_args.clust.kmeans.n_clusters}_'
 
-    if args_.clustering_alg == 'hdbscan':
-        name += f'{args_.min_cluster_size}:{args_.metric}:{args_.cluster_selection_method}_'
+    if visual_args.clust.choice == 'hdbscan':
+        name += f'{visual_args.clust.hdbscan.min_cluster_size}:{visual_args.clust.hdbscan.metric}:{visual_args.clust.hdbscan.cluster_selection_method}_'
 
     # POST
-    name += f"POSTa::{args_.post_alg}:"
-    if args_.post_alg == 'umap':
-        name += f'{args_.post_n_neighbors}:{args_.post_n_components}:{args_.post_metric}:{args_.post_min_dist}_'
+    name += f"POSTa::{visual_args.post.choice}:"
+    if visual_args.post.choice == 'UMAP':
+        name += f'{visual_args.post.umap.n_neighbors}:{visual_args.post.umap.n_components}:{visual_args.post.umap.metric}:{visual_args.post.umap.min_dist}_'
 
-    elif args_.post_alg == 'pca':
-        name += f'{args_.post_n_components}_'
+    elif visual_args.post.choice == 'PCA':
+        name += f'{visual_args.post.pca.n_components}_'
 
-    elif args_.post_alg == 'tsne':
-        # name += f'{args_.post_perplexity}_{args_.post_n_components}_'
-        name += f'{args_.post_n_components}_'
+    elif visual_args.post.choice == 'TSNE':
+        # name += f'{visual_args.post.tsne.perplexity}_{visual_args.post.tsne.metric}_'
+        name += f'{visual_args.post.tsne.n_components}_'
 
     return name + extention
 
@@ -81,4 +84,4 @@ def visualization(args_, x, y, labels):
 
     plt.savefig(os.path.join(OUT_PATH, 'imgs', name))
 
-    return name
+    return name, plt

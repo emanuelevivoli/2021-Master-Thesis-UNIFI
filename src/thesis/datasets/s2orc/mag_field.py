@@ -14,6 +14,7 @@ mag_field_dict: Dict = {
     "Medicine": 0,
     "Biology": 1,
     "Chemistry": 2,
+    "null": 3,
     "Engineering": 4,
     "Computer Science": 5,
     "Physics": 6,
@@ -30,5 +31,4 @@ mag_field_dict: Dict = {
     "Art": 17,
     "History": 18,
     "Philosophy": 19
-    # "null":         3,
 }

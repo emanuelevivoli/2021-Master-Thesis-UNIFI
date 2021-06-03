@@ -9,7 +9,7 @@ CACHE_DIR = ".cache"
 MAIN_PATH = '/home/vivoli/Thesis'
 DATA_PATH = '/home/vivoli/Thesis/data'
 OUT_PATH = '/home/vivoli/Thesis/output'
-ARGS_PATH = '/home/vivoli/Thesis'
+ARGS_PATH = '/home/vivoli/Thesis/args'
 ARGS_FILE = 'arguments.json'
 
 DICTIONARY_FIELD_NAMES = dict(

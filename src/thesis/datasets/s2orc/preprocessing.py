@@ -37,10 +37,11 @@ def fuse_dictionaries(
     # definition of **single_chunk**
     # {'metadata': [], 'pdf_parses': [], 'meta_key_idx': {}, 'pdf_key_idx': {}}
 
-    @no_caching(
+    @_caching(
         key_value_sort(single_chunk["meta_key_idx"]),
         key_value_sort(single_chunk["pdf_key_idx"]),
         data_field,
+        function_name='fuse_dictionaries'
     )
     def _fuse_dictionaries(
         single_chunk: dict, data_field: List[str], log_config: LogConfig
@@ -171,7 +172,7 @@ def get_dataset(
     :return: a dictionary containing train, test, validation dataloaders
     """
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
-    @no_caching(
+    @_caching(
         key_value_sort(single_chunk["meta_key_idx"]),
         key_value_sort(single_chunk["pdf_key_idx"]),
         **fingerprints(dataset_config, run_config, log_config),

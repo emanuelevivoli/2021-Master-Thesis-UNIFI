@@ -100,23 +100,22 @@ class S2orcConfig(CustomConfig):
             self.zipped: bool = False
 
         elif self.s2orc_type == 'full':
-            self.idxs: list = self.str_to_list(kwargs["idxs"])
-            self.zipped: bool = kwargs["zipped"]
+            self.idxs: list = kwargs["s2orc"]["idxs"]
+            self.zipped: bool = kwargs["s2orc"]["zipped"]
 
         self.extention = "jsonl.gz" if self.zipped else "jsonl"
 
-        self.mag_field_of_study: list = self.str_to_list(
-            kwargs["mag_field_of_study"])
+        self.mag_field_of_study: list = kwargs["s2orc"]["mag_field_of_study"]
         # if mag is not None else mag  # options are empty List() or List(string)
         self.dictionary_input: dict = {
-            "data": self.str_to_list(kwargs["data"]),
-            "target": self.str_to_list(kwargs["target"]),
-            "classes": self.str_to_list(kwargs["classes"]),
+            "data": kwargs["data"],
+            "target": kwargs["target"],
+            "classes": kwargs["classes"],
         }
 
         # boolean flags for elaborate papers fields
-        self.keep_none_papers: bool = kwargs["keep_none_papers"]
-        self.keep_unused_columns: bool = kwargs["keep_unused_columns"]
+        self.keep_none_papers: bool = kwargs["s2orc"]["keep_none_papers"]
+        self.keep_unused_columns: bool = kwargs["s2orc"]["keep_unused_columns"]
 
         # path for the dataset
         self.path: str = f"{self.dataset_path}/s2orc-{self.s2orc_type}-20200705v1/{self.s2orc_type}"
@@ -163,7 +162,7 @@ class S2orcConfig(CustomConfig):
         # self.toread_pdfs_s2orc = []
 
     def get_filenames(self, verbose=False):
-        @no_caching(
+        @_caching(
             idxs=self.idxs, s2orc_type=self.s2orc_type, function_name="get_filenames"
         )
         def _get_filenames(idxs, s2orc_type):
@@ -207,7 +206,7 @@ class S2orcConfig(CustomConfig):
         self.get_extention(verbose)
         self.get_filenames(verbose)
 
-        @no_caching(
+        @_caching(
             extention=self.extention,
             metadata_filenames=self.metadata_filenames,
             pdf_parses_filenames=self.pdf_parses_filenames,
@@ -280,7 +279,7 @@ class S2orcConfig(CustomConfig):
                 f"Meta_completed: {self.completed_metadata_filenames} and Pdfs_completed:{self.completed_pdf_parses_filenames}"
             )
 
-        @no_caching(
+        @_caching(
             metadata_output=self.metadata_output,
             pdf_parses_output=self.pdf_parses_output,
             completed_metadata_filenames=self.completed_metadata_filenames,
@@ -364,9 +363,8 @@ class KeyPHConfig(CustomConfig):
         # inizialize the main dataset path
         super().__init__(*args, **kwargs)
 
-        self.keyph_type: List[str] = self.str_to_list(
-            kwargs["dataset_config_name"]
-        )  # options are single choice 'inspec' or multiple 'krapivin,nus,semeval,kp20k'
+        self.keyph_type: List[str] = kwargs["dataset_config_name"]
+        # options are single choice 'inspec' or multiple 'krapivin,nus,semeval,kp20k'
         # path for the dataset
         # need to be appended {type} for every self.keyph_type
         self.path: str = f"{self.dataset_path}/keyphrase/json"
@@ -404,9 +402,8 @@ class JouRNConfig(CustomConfig):
         # inizialize the main dataset path
         super().__init__(*args, **kwargs)
 
-        self.journ_type: List[str] = self.str_to_list(
-            kwargs["dataset_config_name"]
-        )  # options are single choice 'inspec' or multiple 'krapivin,nus,semeval,kp20k'
+        self.journ_type: List[str] = kwargs["dataset_config_name"]
+        # options are single choice 'inspec' or multiple 'krapivin,nus,semeval,kp20k'
         # path for the dataset
         # need to be appended {type} for every self.journ_type
         self.path: str = f"{self.dataset_path}/s2orc-journal/"

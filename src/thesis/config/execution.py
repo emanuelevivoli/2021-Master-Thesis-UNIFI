@@ -1,5 +1,6 @@
 from .base import Config
 from typing import Dict
+from thesis.parsers.classes import CallBacks
 
 
 class RunConfig(Config):
@@ -14,11 +15,11 @@ class RunConfig(Config):
         # inizialize all variables
         self.name: str = kwargs["run_name"]  # (string) experiment name
         # (number) for the relative experiment
-        self.number: int = int(kwargs["run_number"])
+        self.number: int = kwargs["run_number"]
         # (string) iteration code
         self.iteration: str = kwargs["run_iteration"]
         # (number) the seed for the system randomness
-        self.seed: int = int(kwargs["seed"])
+        self.seed: int = kwargs["seed"]
 
     def get_fingerprint(self) -> Dict:
         # return disctionay of important value to hash
@@ -43,7 +44,7 @@ class LogConfig(Config):
         self.debug: bool = kwargs["debug_log"]  # (bool) flag
         self.time: bool = kwargs["time"]  # (bool) flag
         # (string) call back setting
-        self.callbacks: List[str] = self.str_to_list(kwargs["callbacks"])
+        self.callbacks: List[CallBacks] = kwargs["callbacks"]
 
     def set_logger(self, logger: Logger):
         self.logger = logger

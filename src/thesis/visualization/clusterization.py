@@ -3,14 +3,14 @@ from hdbscan import HDBSCAN
 
 
 def clusterization(visual_args, embeddings=None):
-    if visual_args.clustering_alg == 'kmeans':
+    if visual_args.clust.choice == 'KMEANS':
         clustering_model = KMEANS(
-            n_clusters=visual_args.n_clusters).fit(embeddings)
+            n_clusters=visual_args.clust.kmeans.n_clusters).fit(embeddings)
         cluster = clustering_model.labels_
 
-    elif visual_args.clustering_alg == 'hdbscan':
-        clustering_model = HDBSCAN(min_cluster_size=visual_args.min_cluster_size, metric=visual_args.metric,
-                                   cluster_selection_method=visual_args.cluster_selection_method).fit(embeddings)
+    elif visual_args.clust.choice == 'HDBSCAN':
+        clustering_model = HDBSCAN(min_cluster_size=visual_args.clust.hdbscan.min_cluster_size, metric=visual_args.clust.hdbscan.metric,
+                                   cluster_selection_method=visual_args.clust.hdbscan.cluster_selection_method).fit(embeddings)
         cluster = clustering_model.labels_
 
     else:
