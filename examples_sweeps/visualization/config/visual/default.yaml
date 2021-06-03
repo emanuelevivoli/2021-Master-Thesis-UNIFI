@@ -1,0 +1,20 @@
+# ------------------ 
+# VisualizationArguments
+# ------------------ 
+# ? model_name_or_path
+# ? model_type
+# ? config_name
+fields: 
+  - abstract
+
+pre: umap
+# pre: tsne
+# pre: pca
+
+clust: kmeans
+# clust: hdbscan
+# clust: hierarchical
+
+post: umap
+# post: tsne
+# post: pca

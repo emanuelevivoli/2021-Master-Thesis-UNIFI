@@ -37,9 +37,9 @@ def main(args=None):
     tags = tag_generation(args)
     # Pass them to wandb.init
     wandb.init(
-        project='example-visualization',
+        project='real-sweeps',
         notes="Try out the visualization baselines",
-        tags=["visualization"]+tags,
+        tags=["visualization", "sweeps"]+tags,
         config=args.to_dict(),
     )
     # Access all hyperparameter values through wandb.config
@@ -213,6 +213,7 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+
     # import os
     # from thesis.utils.constants import ARGS_PATH
     # main(os.path.join(ARGS_PATH, 'args.yaml'))

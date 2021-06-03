@@ -1,0 +1,1 @@
+cat sweep*.yaml | grep tot: |  sed 's/[^0-9]*//g' | awk '{s+=$1} END {print s}'

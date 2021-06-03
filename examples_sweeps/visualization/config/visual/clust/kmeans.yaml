@@ -1,0 +1,4 @@
+name: KMEANS
+n_clusters: 20
+n_init: 10
+max_iter: 300

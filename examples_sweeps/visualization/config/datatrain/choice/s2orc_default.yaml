@@ -1,0 +1,9 @@
+dataset_name: s2orc
+dataset_config_name: sample
+idxs: 
+  - 0
+zipped: True
+mag_field_of_study: []
+  # - Computer Science
+keep_none_papers: False
+keep_unused_columns: False

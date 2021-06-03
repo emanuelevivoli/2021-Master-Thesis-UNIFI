@@ -1,0 +1,4 @@
+name: HDBSCAN
+min_cluster_size: 5
+metric: 'euclidean'
+cluster_selection_method: 'eom'

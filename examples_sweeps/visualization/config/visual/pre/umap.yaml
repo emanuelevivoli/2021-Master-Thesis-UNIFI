@@ -1,0 +1,4 @@
+name: UMAP
+n_neighbors: 15
+metric: cosine
+n_components: 50

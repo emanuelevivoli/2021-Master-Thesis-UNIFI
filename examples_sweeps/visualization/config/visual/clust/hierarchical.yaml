@@ -1,0 +1,3 @@
+name: HIERARCHICAL
+affinity: 'euclidean' # “l1” “l2” “manhattan” “cosine” or “precomputed”
+linkage: 'ward' # ‘complete’ ‘average’ ‘single’

@@ -1,0 +1,34 @@
+# ------------------
+# DataTrainArguments
+# ------------------ 
+dataset_path: /home/vivoli/Thesis/data
+dataset_name: ${choice.dataset_name}
+dataset_config_name: ${choice.dataset_config_name}
+# ? train_file
+# ? validation_file
+# ? validation_split_percentage
+data: 
+  - abstract
+target: 
+  - title
+classes: 
+  - mag_field_of_study
+
+# ? pad_to_max_length
+# ? use_slow_tokenizer
+# ? overwrite_cache
+max_seq_length: '512'
+# ? preprocessing_num_workers
+# ? mlm_probability
+# ? line_by_line
+# ? max_train_samples
+# ? max_eval_samples
+
+## ----- S2orcArguments ----- #
+choice: s2orc_default
+
+## ----- KeyPhArguments ----- #
+# choice: keyph_default
+
+## ----- JournArguments ----- #
+# choice: journ_default

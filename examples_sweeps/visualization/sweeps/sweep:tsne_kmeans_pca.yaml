@@ -1,0 +1,45 @@
+description: |
+  calculates: 4*3 * 3*3 * 3 * 1
+  tot: 324
+program: pipeline_visualization.py
+method: grid
+name: tsne_kmeans_pca
+metric:
+  name: "adj_rand_score"
+  goal: maximize
+
+parameters:
+  datatrain.dataset_name:
+    value: s2orc
+  datatrain.dataset_config_name:
+    value: sample
+  training.seed:
+    value: 1234 
+  model.model_name_or_path:
+    values: [ allenai/scibert_scivocab_uncased, distilbert-base-nli-mean-tokens, bert-base-uncased, paraphrase-distilroberta-base-v1]
+  visual.fields:
+    values: ["title,abstract", title, abstract]
+  # ! pre
+  visual.pre.choice: 
+    value: TSNE 
+  visual.pre.tsne.metric: 
+    value: cosine 
+  visual.pre.tsne.perplexity: 
+    values: [5, 30, 50]
+  visual.pre.tsne.n_components:
+    values: [5, 15, 50] # [2, 4, 15, 50] 
+  # ! clust
+  visual.clust.choice: 
+    value: KMEANS 
+  visual.clust.kmeans.n_clusters: 
+    values: [3, 10, 20]
+  # ! post
+  visual.post.choice: 
+    value: PCA
+  visual.post.pca.n_components: 
+    value: 2
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - ${args}

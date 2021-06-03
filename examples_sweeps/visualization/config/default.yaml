@@ -1,0 +1,13 @@
+
+
+datatrain: default
+training: default
+model: default
+embedds: default
+visual: default
+runs: default
+logs: default
+  
+defaults:
+- hydra/job_logging: colorlog
+- hydra/hydra_logging: colorlog

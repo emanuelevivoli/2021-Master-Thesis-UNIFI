@@ -1,0 +1,4 @@
+name: TSNE
+n_neighbors: 15
+metric: 'cosine'  
+perplexity: 30.0

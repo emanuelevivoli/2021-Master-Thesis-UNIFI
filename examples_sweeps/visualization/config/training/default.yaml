@@ -1,0 +1,19 @@
+# ------------------ 
+# TrainingArguments
+# ------------------ 
+seed: 1234
+do_train: False
+do_eval: False
+do_predict: False
+output_dir: /home/vivoli/Thesis/output
+# ? overwrite_output_dir
+num_train_epochs: 1 
+# ? max_train_steps
+per_device_train_batch_size: 8    # 16 and 32 end with "RuntimeError: CUDA out of memory."
+per_device_eval_batch_size: 8    # 16 and 32 end with "RuntimeError: CUDA out of memory."
+# ? learning_rate
+# ? weight_decay
+# ? gradient_accumulation_steps
+# ? lr_scheduler_type
+# ? num_warmup_steps
+# ? logging_dir
