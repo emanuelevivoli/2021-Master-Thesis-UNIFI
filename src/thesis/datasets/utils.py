@@ -87,13 +87,19 @@ def fuse_datasets_splits(dataset) -> Dataset:
     return concatenate_datasets([dataset[key] for key in dataset.keys()])
 
 
-def split_and_replicate(dataset) -> Dataset:
+def split_and_replicate(dataset, keep_fields, label_field) -> Dataset:
     def chunk_examples(sentences):
-        chunks = pd.DataFrame(columns=dataset.column_names)
-        for abs_, tit_, mags_ in zip(sentences['abstract'], sentences['title'], sentences['mag_field_of_study']):
-            for mag_field in mags_:
-                chunks = chunks.append({'title': tit_, 'abstract': abs_,
-                                        'mag_field_of_study': [mag_field]}, ignore_index=True)
+        keys = keep_fields + label_field
+        chunks = pd.DataFrame(columns=keys)
+        to_zip = [sentences[key]
+                  for key in keys if key in dataset.column_names]
+        for fields in zip(*to_zip):
+            for class_field in fields[-1]:
+                d = dict()
+                for field in keys[:-1]:
+                    d[field] = fields[keys.index(field)]
+                d[keys[-1]] = class_field
+                chunks = chunks.append(d, ignore_index=True)
         app = chunks.to_dict('list')
         return app
 

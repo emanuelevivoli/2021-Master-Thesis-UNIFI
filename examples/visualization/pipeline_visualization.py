@@ -68,7 +68,7 @@ def main(args=None):
         args.runs.to_dict(discard=['run_name']),
         function_name='get_dataset'
     )
-    def get_dataset(args, label_field='mag_field_of_study'):
+    def get_dataset(args, keep_fields=['title', 'abstract'], label_field=['mag_field_of_study']):
         # Getting the load_dataset wrapper that manages huggingface dataset and the custom ones
         # Loading the raw data based on input (and default) values of arguments
         raw_dataset = custom_load_dataset(args)
@@ -83,12 +83,15 @@ def main(args=None):
         # As we need only one field the next step is to fude them together
         dataset = fuse_datasets_splits(dataset)
 
-        # The Papers that comes with multiple labels ('mag_field_of_study')
-        # are replicated in the dataset with each 'mag_field'
-        dataset = split_and_replicate(dataset)
+        # The Papers that comes with multiple labels ('mag_field_of_study' or 'keyphrases')
+        # are replicated in the dataset with each 'mag_field'/'keyphrase'
+        dataset = split_and_replicate(dataset, keep_fields, label_field)
 
-        labels_true = np.asarray([mag_field_dict[mag.pop()]
-                                  for mag in dataset[label_field]])
+        if label_field is not None:
+            labels_true = np.asarray([mag_field_dict[mag.pop()]
+                                      for mag in dataset[label_field]])
+        else:
+            labels_true = None
 
         return dataset, labels_true
 
@@ -97,7 +100,8 @@ def main(args=None):
     # config_ = DotDict(config)
     args_ = args
 
-    dataset, labels_true = get_dataset(args_)
+    dataset, labels_true = get_dataset(
+        args_, args_.datatrain.data + args_.datatrain.target, args_.datatrain.classes)
     # artifacts.labels_true = labels_true
     corpus = select_concat_fields(dataset, args.visual.fields)
 
