@@ -1,4 +1,7 @@
 import os
+from thesis.datasets.s2orc.mag_field import mag_field_dict
+from thesis.datasets.journals.mag_field import ICDAR_field, ICPR_field, IJDAR_field
+
 
 # RAW_DIR = "data_raw"
 # DATASETS_DIR = "datasets"
@@ -23,4 +26,11 @@ _factory_MODELS = {
     'scibert':    'allenai/scibert_scivocab_uncased',
     'paraphrase': 'paraphrase-distilroberta-base-v1',
     'distilbert': 'distilbert-base-nli-mean-tokens',
+}
+
+LABEL_DICT = {
+    's2orc': mag_field_dict,
+    'icdar_19': ICDAR_field,
+    'icpr_20': ICPR_field,
+    'ijdar_20': IJDAR_field
 }
