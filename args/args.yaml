@@ -1,38 +1,38 @@
-# nocache:  "True"
-
+--- # ------------------
 # ------------------
 # DatasetArguments
-# ------------------ 
 datatrain:
+  # no_cache:  "True"
   dataset_path: /home/vivoli/Thesis/data
   dataset_name: s2orc # "keyphrase"
-  dataset_config_name: sample  # "inspec"
+  dataset_config_name: sample # "inspec"
   # ? train_file
   # ? validation_file
   # ? validation_split_percentage
-  data: 
+  data:
     - abstract
-  target: 
+  target:
     - title
-  classes: 
-    - mag_field_of_study  # "keywords"
-  
+  classes:
+    - mag_field_of_study # "keywords"
+
   # ? pad_to_max_length
   # ? use_slow_tokenizer
   # ? overwrite_cache
-  max_seq_length: '512'
+  max_seq_length: "512"
   # ? preprocessing_num_workers
   # ? mlm_probability
   # ? line_by_line
   # ? max_train_samples
   # ? max_eval_samples
-  
+
   ## ----- S2orcArguments ----- #
   s2orc:
-    idxs: 
+    idxs:
       - 0
     zipped: True
-    mag_field_of_study: []
+    mag_field_of_study:
+      []
       # - Computer Science
     keep_none_papers: False
     keep_unused_columns: False
@@ -44,20 +44,21 @@ datatrain:
   # journ:
   #   # no params
 
-# ------------------ 
+# ------------------
 # TrainingArguments
-# ------------------ 
+# ------------------
 training:
+  # no_cache:  "True"
   seed: 1234
   do_train: False
   do_eval: False
   do_predict: False
   output_dir: /home/vivoli/Thesis/output
   # ? overwrite_output_dir
-  num_train_epochs: 1 
+  num_train_epochs: 1
   # ? max_train_steps
-  per_device_train_batch_size: 8    # 16 and 32 end with "RuntimeError: CUDA out of memory."
-  per_device_eval_batch_size: 8    # 16 and 32 end with "RuntimeError: CUDA out of memory."
+  per_device_train_batch_size: 8 # 16 and 32 end with "RuntimeError: CUDA out of memory."
+  per_device_eval_batch_size: 8 # 16 and 32 end with "RuntimeError: CUDA out of memory."
   # ? learning_rate
   # ? weight_decay
   # ? gradient_accumulation_steps
@@ -65,48 +66,50 @@ training:
   # ? num_warmup_steps
   # ? logging_dir
 
-# ------------------ 
+# ------------------
 # ModelArguments
-# ------------------ 
+# ------------------
 model:
+  # no_cache:  "True"
   model_name_or_path: allenai/scibert_scivocab_uncased # 'distilbert-base-nli-mean-tokens' 'bert-base-uncased' 'allenai/scibert_scivocab_uncased' 'paraphrase-distilroberta-base-v1'
   # ? model_type
   # ? config_name
-  
   # ? tokenizer_name
   # ? cache_dir
   # ? use_fast_tokenizer
   # ? model_revision
   # ? use_auth_token
 
-# ------------------ 
+# ------------------
 # EmbeddingArguments
-# ------------------ 
+# ------------------
 embedds:
+  # no_cache:  "True"
   # ? pooling
   # ? batch_size
 
-# ------------------ 
+# ------------------
 # VisualizationArguments
-# ------------------ 
+# ------------------
 visual:
+  # no_cache:  "True"
   # ? model_name_or_path
   # ? model_type
   # ? config_name
 
-  fields: 
+  fields:
     - abstract
 
-  pre:    
+  pre:
     choice: UMAP
 
     umap:
       n_neighbors: 15
       metric: cosine
-      n_components: 50  # 768 -> 50  
+      n_components: 50 # 768 -> 50
     # tsne:
     #   n_neighbors: 15
-    #   metric: 'cosine'  
+    #   metric: 'cosine'
     #   perplexity: 30.0
     # pca:
     #   n_neighbors: 15
@@ -128,36 +131,35 @@ visual:
 
   post:
     choice: UMAP
-    
+
     umap:
       n_neighbors: 15
       metric: cosine
-      n_components: 2  # 50 -> 2
+      n_components: 2 # 50 -> 2
       min_dist: 0.0
     # tsne:
     #   n_neighbors: 15
-    #   metric: 'cosine'  
+    #   metric: 'cosine'
     #   perplexity: 30.0
     # pca:
     #   n_neighbors: 15
 
-
-# ------------------ 
+# ------------------
 # RunArguments
-# ------------------ 
+# ------------------
 runs:
   run_name: scibert-s2orc
   run_number: 0
   run_iteration: 0
 
-# ------------------ 
+# ------------------
 # LoggingArguments
-# ------------------ 
+# ------------------
 logs:
   verbose: False
   debug_log: False
   time: False
-  callbacks: 
+  callbacks:
     - WandbCallback
     - CometCallback
     - TensorBoardCallback

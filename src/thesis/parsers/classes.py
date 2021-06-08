@@ -153,6 +153,13 @@ class DataTrainingArguments(Serializable):
             "help": "The percentage of the train set used as validation set in case there's no validation split"
         },
     )
+    no_splits: bool = field(
+        default=False,
+        metadata={
+            "help": "Whether to avoid splitting in train/test/valid. "
+            "If False, will split the samples in those 3 'default' splits; if True won't split at all."
+        },
+    )
     data: List[str] = list_field(
         "abstract",
         metadata={

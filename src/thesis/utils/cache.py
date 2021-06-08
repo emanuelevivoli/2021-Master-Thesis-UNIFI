@@ -12,6 +12,7 @@ class ConfigWrapper:
     # function_name: str = ''
     # config_dict: Dict = {}
     # config_list: List = []
+    no_cache: bool = False
 
     def __init__(self, *args, **kwargs):
         """
@@ -46,6 +47,8 @@ class ConfigWrapper:
 
         for el in args:
             self.config_list.append(el)
+
+        self.no_cache = self.config_dict.get('no_cache', False)
 
     def __str__(self):
         return (
@@ -98,11 +101,17 @@ def _caching(*conf_args, **conf_kwargs):
             ).hexdigest()
 
             file_cache = os.path.join(CACHE_DIR, hex_digest)
-            if not os.path.exists(file_cache):
+            if not config_object.no_cache:
                 print(
-                    f"calculating result for function {function.__qualname__}...",
-                    end="",
-                )
+                    f"skipping caching for function {function.__qualname__}...", end="", )
+                print(
+                    f"calculating result for function {function.__qualname__}...", end="", )
+                result = function(*args, **kwargs)
+                print(
+                    f"\rcalculated result for function {function.__qualname__}    ")
+            elif not os.path.exists(file_cache):
+                print(
+                    f"calculating result for function {function.__qualname__}...", end="", )
                 result = function(*args, **kwargs)
                 with open(file_cache, "wb") as file:
                     pickle.dump(result, file)
@@ -110,14 +119,11 @@ def _caching(*conf_args, **conf_kwargs):
                     f"\rcalculated result for function {function.__qualname__}    ")
             else:
                 print(
-                    f"loading result from cache for function {function.__qualname__}...",
-                    end="",
-                )
+                    f"loading result from cache for function {function.__qualname__}...", end="", )
                 with open(file_cache, "rb") as file:
                     result = pickle.load(file)
                 print(
-                    f"\rloaded result from cache for function {function.__qualname__}    "
-                )
+                    f"\rloaded result from cache for function {function.__qualname__}    ")
             return result
 
         return wrapped_function
