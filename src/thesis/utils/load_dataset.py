@@ -1,7 +1,5 @@
 import logging
 
-from datasets.load import load_dataset
-
 from thesis.config.datasets import S2orcConfig, KeyPHConfig, JouRNConfig
 from thesis.config.execution import RunConfig, LogConfig
 
@@ -87,6 +85,7 @@ def load_dataset_wrapper():
             )
 
         else:
+            from datasets.load import load_dataset
             logging.info(
                 f"Huggingface: downloading and loading a dataset from the hub."
             )

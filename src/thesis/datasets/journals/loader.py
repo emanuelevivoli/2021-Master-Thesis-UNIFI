@@ -36,14 +36,12 @@ def journal_loader(
     """
 
     # For everychunk we get an element composed by 4 elements:
-    dataset = json_journal_read(dataset_config, log_config, run_config)
+    dataset = json_journal_read(dataset_config, run_config, log_config)
 
-    # TODO #
     def filter_dataset(
         dataset_config: JouRNConfig, log_config: LogConfig, datasets: List[Dataset]
     ):
-        # TODO # Filter datasets elements based on some arguments
-        # TODO # (mag_field_of_studies or journals)
+        # TODO # Filter datasets elements based on some arguments (mag_field_of_studies or journals)
         return datasets
 
     # Filter some paper based on specific arguments

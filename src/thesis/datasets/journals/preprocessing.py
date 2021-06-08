@@ -47,8 +47,8 @@ def get_dataset(
     """
     # **(dataset_config.get_fingerprint()), **(run_config.get_fingerprint()), **(log_config.get_fingerprint())
     @no_caching(
-        key_value_sort(single_chunk["meta_key_idx"]),
-        key_value_sort(single_chunk["pdf_key_idx"]),
+        # key_value_sort(single_chunk["meta_key_idx"]),
+        # key_value_sort(single_chunk["pdf_key_idx"]),
         **fingerprints(dataset_config, run_config, log_config),
         function_name="get_dataset",
     )

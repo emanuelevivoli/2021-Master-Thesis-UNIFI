@@ -49,7 +49,7 @@ def parse_args(
         print(f"[   Dict   ] type(args_) is dict: args_={args_}")
         # parses_args = parser.parse_args(args_)
         parses_args = Args()
-        parses_args = parses_args.from_dict(os.path.abspath(file_name))
+        parses_args = parses_args.from_dict(args_)
         print(
             f"[   Dict   ] type(args_) is {type(args_) }: parses_args")  # :{parses_args}")
 
@@ -83,7 +83,7 @@ def parse_args(
 
     # Sanity check (List)
     def sanity_check_list(item_type, string):
-        if any(map(lambda x: isinstance(x, enum.Enum) or isinstance(x, int), string)) or \
+        if any(map(lambda x: isinstance(x, enum.Enum) or isinstance(x, int) or isinstance(x, list), string)) or \
                 not any(map(lambda x: x.find(','), string)):
             app = string
         else:

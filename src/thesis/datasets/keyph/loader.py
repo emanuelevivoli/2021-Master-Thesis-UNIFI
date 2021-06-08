@@ -38,12 +38,10 @@ def keyph_loader(
     # For everychunk we get an element composed by 4 elements:
     datasets = json_keyphrase_read(dataset_config, log_config)
 
-    # TODO #
     def filter_dataset(
         dataset_config: KeyPHConfig, log_config: LogConfig, datasets: List[Dataset]
     ):
-        # TODO # Filter datasets elements based on some arguments
-        # TODO # (mag_field_of_studies or keyphrases)
+        # TODO # Filter datasets elements based on some arguments (mag_field_of_studies or keyphrases)
         return datasets
 
     # Filter some paper based on specific arguments
