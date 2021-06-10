@@ -153,6 +153,13 @@ class DataTrainingArguments(Serializable):
             "help": "The percentage of the train set used as validation set in case there's no validation split"
         },
     )
+    no_cache: bool = field(
+        default=False,
+        metadata={
+            "help": "Whether to avoid loading previously created results. "
+            "If False, will load the cached file, if exists; if True won't load anything at all."
+        },
+    )
     no_splits: bool = field(
         default=False,
         metadata={
@@ -297,6 +304,13 @@ class TrainingArguments(Serializable):  # (HfTrainingArguments):
             "help": "If True, it automatically train from scratch (it overwrites the output folder!) ."
         }
     )
+    # no_cache: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether to avoid loading previously created results. "
+    #         "If False, will load the cached file, if exists; if True won't load anything at all."
+    #     },
+    # )
     num_train_epochs: int = field(
         default=3,
         metadata={
@@ -365,6 +379,16 @@ class TrainingArguments(Serializable):  # (HfTrainingArguments):
 
     # def __post_init__(self):
     #     super().__post_init__()
+    def to_dict(self, discard: List[str] = list([])) -> Dict:
+        partial_dict = super().to_dict()
+        for key in discard:
+            try:
+                del partial_dict[key]
+            except:
+                print(f"Error: key {key} doesn't exists")
+                continue
+
+        return partial_dict
 
 
 @dataclass
@@ -405,6 +429,13 @@ class ModelArguments(Serializable):
             "help": "Where do you want to store the pretrained models downloaded from huggingface.co"
         },
     )
+    # no_cache: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether to avoid loading previously created results. "
+    #         "If False, will load the cached file, if exists; if True won't load anything at all."
+    #     },
+    # )
     use_fast_tokenizer: bool = field(
         default=True,
         metadata={
@@ -431,7 +462,13 @@ class EmbeddingArguments(Serializable):
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
-
+    # no_cache: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether to avoid loading previously created results. "
+    #         "If False, will load the cached file, if exists; if True won't load anything at all."
+    #     },
+    # )
     pooling: Optional[str] = field(
         default=None,
         metadata={
@@ -559,7 +596,13 @@ class VisualArguments(Serializable):
             "help": "Field from dataset to use for embedding generation"
         },
     )
-
+    # no_cache: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether to avoid loading previously created results. "
+    #         "If False, will load the cached file, if exists; if True won't load anything at all."
+    #     },
+    # )
     pre: DimRedArguments = DimRedArguments()
 
     clust: ClustArguments = ClustArguments()
@@ -572,7 +615,13 @@ class RunArguments(Serializable):
     """
     Arguments related run configurations.
     """
-
+    # no_cache: bool = field(
+    #     default=False,
+    #     metadata={
+    #         "help": "Whether to avoid loading previously created results. "
+    #         "If False, will load the cached file, if exists; if True won't load anything at all."
+    #     },
+    # )
     run_name: Optional[str] = field(
         default=f"s2orc-run-{datetime.now().strftime('%d-%m-%Y-%H-%M-%S')}",
         metadata={

@@ -1,6 +1,6 @@
 import os
 from thesis.datasets.s2orc.mag_field import mag_field_dict
-from thesis.datasets.journals.mag_field import ICDAR_field, ICPR_field, IJDAR_field
+from thesis.datasets.journals.mag_field import ICDAR_field, ICPR_field, ICPR_subfield, IJDAR_field
 
 
 # RAW_DIR = "data_raw"
@@ -33,4 +33,11 @@ LABEL_DICT = {
     'icdar_19': ICDAR_field,
     'icpr_20': ICPR_field,
     'ijdar_20': IJDAR_field
+}
+
+SUBLABEL_DICT = {
+    's2orc': None,
+    'icdar_19': None,
+    'icpr_20': ICPR_subfield,
+    'ijdar_20': None
 }

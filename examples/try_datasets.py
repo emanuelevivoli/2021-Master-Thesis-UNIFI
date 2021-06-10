@@ -82,12 +82,14 @@ def main(args=None):
         else:
             labels_true = None
 
-        return dataset, labels_true
+        idxs = labels_true != -1
+
+        return dataset[idxs], labels_true[idxs]
 
     # We want to access to dictionary with Dot notation (dict.field)
     # instead of the String one (dict['field'])
     # config_ = DotDict(config)
-    args_ = args
+    args_ = args  # DotDict(config)
 
     dataset, labels_true = get_dataset(
         args_, args_.datatrain.data + args_.datatrain.target, args_.datatrain.classes)
@@ -103,7 +105,7 @@ if __name__ == '__main__':
     args = dict(
         # DatasetArguments
         datatrain=dict(
-            # no_cache=True,
+            no_cache=True,
             dataset_path='/home/vivoli/Thesis/data',
             dataset_name='journal',
             dataset_config_name='icpr_20',

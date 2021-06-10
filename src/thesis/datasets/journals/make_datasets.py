@@ -18,13 +18,20 @@ def main(dataset='icpr_20'):
     PRINCIPAL_FIELD = 'title'
     NO_GROUP = None
 
-    GROUP_FILE = 'groups'
+    FIELD_NAME = 'subgroup'
+    GROUP_FILE = 'subgroups'
     TITLE_FILE = 'titles'
 
     JOURNAL_PATH = os.path.join(DATA_PATH, S2ORC_PATH)
     SESSION_FULL = os.path.join(DATA_PATH, S2ORC_PATH, SESSION_PATH)
 
     def read_session_file(GROUP_FILE):
+        """ Read session file (txt) from default folder SESSION_FULL
+        Option for sessions are:
+            - titles
+            - groups
+            - subgroups
+        """
         lines = list()
         with open(os.path.join(SESSION_FULL, f'{dataset}_{GROUP_FILE}.txt')) as f_in:
             # All lines including the blank ones
@@ -39,9 +46,20 @@ def main(dataset='icpr_20'):
     total = len(titles_lines)
 
     def lists_to_dict(lines, invert=False):
+        """ Creates a dictionary with
+            k and v, where:
+            - groups: 
+                k is the code `OS T1.1` and
+                v is the group name `Machine Learning`
+            - titles:
+                k is the title and
+                v is the code `OS T1.1`
+        """
         d = dict()
         for line in lines:
             k, v = line.split(' : ')
+            if GROUP_FILE == 'subgroups':
+                k = k.split('.')[0]
             if not invert:
                 d[k] = v
             else:
@@ -54,6 +72,11 @@ def main(dataset='icpr_20'):
     del titles_lines
 
     def assign_group_title(groups_dict, titles_dict):
+        """ Starting from the group and title dictionaries
+        it fuses both in one dictionary that has:
+            k is the title and
+            v is the group name `Machine Learning`
+        """
         d = dict()
         for title_k, title_v in titles_dict.items():
             for group_k, group_v in groups_dict.items():
@@ -67,6 +90,9 @@ def main(dataset='icpr_20'):
     del titles_dict
 
     def read_dataset_jsonl():
+        """ Reads from file the jsonl dataset
+        and return it
+        """
         DATASET_PATH = os.path.join(JOURNAL_PATH, f"{dataset}.jsonl")
         json_list = list()
         with open(DATASET_PATH, 'r') as j_in:
@@ -80,6 +106,19 @@ def main(dataset='icpr_20'):
     dataset_list = read_dataset_jsonl()
 
     def get_most_similar(title_group, string):
+        """ Having the title_group dictionary with
+        - title as k and group name as value, and
+        - string as paper title
+        it finds the corresponding paper group name
+        from the dictionary based on a measure on the
+        titles (because the titles may be not the same)
+
+        It returns the triplet (t, s, g)
+        - title
+        - score
+        - group
+
+        """
 
         # Function to measure the similarity
         # between a sentence and lots of others
@@ -121,10 +160,16 @@ def main(dataset='icpr_20'):
                 c += l1[i]*l2[i]
             similarities[title] = (c / float((sum(l1)*sum(l2))**0.5), group)
 
-        best = sorted(similarities.items(), key=lambda item: item[1]).pop()
+        best = sorted(similarities.items(), key=lambda item: item[1][0]).pop()
         return best[0], best[1][0], best[1][1]
 
     def add_group_field(dataset_list, title_group):
+        """ It search (by using the previous function
+        get_most_similar) the best fit from all dictionary
+        then if the score is bigger than a threshold (default=0.5)
+        it assignes the group value to the field FIELD_NAME
+
+        """
         recovered = 0
         finished_jsonl = list()
         for json_line in dataset_list:
@@ -139,10 +184,10 @@ def main(dataset='icpr_20'):
                 title_group, finished_line[PRINCIPAL_FIELD])
             finished_jsonl.append(finished_line)
             if s > 0.5:
-                finished_line['group'] = g
+                finished_line[FIELD_NAME] = g
                 recovered += 1
             else:
-                finished_line['group'] = NO_GROUP
+                finished_line[FIELD_NAME] = NO_GROUP
 
         return finished_jsonl, recovered
 
@@ -169,4 +214,4 @@ def main(dataset='icpr_20'):
 if __name__ == '__main__':
 
     main('icpr_20')
-    main('icdar_19')
+    # main('icdar_19')

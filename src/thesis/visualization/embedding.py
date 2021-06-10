@@ -6,14 +6,15 @@ def embedd(args, corpus, eventual_max_seq_length=512):
 
     @_caching(
         **args.datatrain.to_dict(),
-        **args.training.to_dict(),
+        **args.training.to_dict(discard=['output_dir']),
         **args.model.to_dict(),
         **args.runs.to_dict(discard=['run_name']),
         function_name='embedd'
     )
     def _embedd(args, corpus, eventual_max_seq_length=512):
         model = SentenceTransformer(args.model.model_name_or_path)
-        model.max_seq_length = eventual_max_seq_length if model.max_seq_length is None else model.max_seq_length
+        model.max_seq_length = args.datatrain.max_seq_length if args.datatrain.max_seq_length else (
+            eventual_max_seq_length if model.max_seq_length is None else model.max_seq_length)
 
         embeddings = model.encode(corpus, show_progress_bar=True)
         return embeddings

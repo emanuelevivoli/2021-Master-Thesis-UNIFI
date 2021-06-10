@@ -46,7 +46,11 @@ class ConfigWrapper:
             # setattr(self.config_dict, k, v)
 
         for el in args:
-            self.config_list.append(el)
+            if type(el) is dict:
+                for k, v in el.items():
+                    self.config_dict[k] = v
+            else:
+                self.config_list.append(el)
 
         self.no_cache = self.config_dict.get('no_cache', False)
 
@@ -101,7 +105,7 @@ def _caching(*conf_args, **conf_kwargs):
             ).hexdigest()
 
             file_cache = os.path.join(CACHE_DIR, hex_digest)
-            if not config_object.no_cache:
+            if config_object.no_cache:
                 print(
                     f"skipping caching for function {function.__qualname__}...", end="", )
                 print(

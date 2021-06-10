@@ -30,8 +30,7 @@ ICDAR_field: Dict = {
     "Mathematical Expression and Text Recognition": 5,
     "Layout Analysis": 6,
     "Applications of Document Analysis": 7,
-    "Script Identification and Authentication": 8,
-    "Script Identification and Authentication": 9,
+    "Script Identification and Authentication": 8
 }
 
 ICPR_field: Dict = {
@@ -59,6 +58,14 @@ ICPR_field: Dict = {
     "Scene Text Detection and Recognition": 21,
     "Medical Imaging": 22,
     "Scene Analysis, Learning, and Datasets": 23,
+}
+
+ICPR_subfield: Dict = {
+    "Machine Learning & Pattern Analysis": 0,
+    "Human Poses, Faces and Fingerprints": 1,
+    "Computer Vision": 2,
+    "Document and Text Analysis": 3,
+    "Image and Signal processing": 4
 }
 
 IJDAR_field: Dict = {

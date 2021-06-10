@@ -4,8 +4,8 @@
 datatrain:
   # no_cache:  "True"
   dataset_path: /home/vivoli/Thesis/data
-  dataset_name: journal # s2orc # "keyphrase"
-  dataset_config_name: icpr # full # sample # "inspec"
+  dataset_name: journal
+  dataset_config_name: icpr_20
   # ? train_file
   # ? validation_file
   # ? validation_split_percentage
@@ -14,7 +14,7 @@ datatrain:
   target:
     - title
   classes:
-    - mag_field_of_study # "keywords"
+    - group
 
   # ? pad_to_max_length
   # ? use_slow_tokenizer
@@ -123,6 +123,12 @@ visual:
     #   min_cluster_size: 5
     #   metric: 'euclidean'
     #   cluster_selection_method: 'eom'
+    # optics:
+    #   min_cluster_size: .05
+    #   # metric: 'minkowski'
+    #   # cluster_method: 'xi' # “xi” and “dbscan”
+    #   xi: .05
+    #   min_samples: 5
     # hierarchical:
     #   affinity: 'euclidean' # “l1” “l2” “manhattan” “cosine” or “precomputed”
     #   linkage: 'ward'  # ‘complete’ ‘average’ ‘single’
