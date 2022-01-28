@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Master Thesis on NLP based on Huggingface (BERT models such as BERT, SciBERT, RoBERTa), sentence-transformers (sBERT) and OAG-BERT applied on scientific papers from OAG and S2ORC.
+Master Thesis on NLP based on Huggingface (BERT models such as BERT, SciBERT, RoBERTa), sentence-transformers (sBERT) and OAG-BERT applied on scientific papers from [OAG](https://www.microsoft.com/en-us/research/project/open-academic-graph/) and [S2ORC](https://github.com/allenai/s2orc).
 
 ## Todo
 - [ ] refactoring code
