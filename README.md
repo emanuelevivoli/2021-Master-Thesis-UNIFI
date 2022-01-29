@@ -15,6 +15,9 @@ Master Thesis on NLP based on Huggingface (BERT models such as BERT, SciBERT, Ro
 - [ ] refactoring code
 - [ ] describe code
 - [ ] describe examples
+- [ ] add manuscript
+- [ ] add slides
+- [ ] add pubblication
 
 # Contacts
 If you are interested in something, don't hesitate to contact me or open an issue.
